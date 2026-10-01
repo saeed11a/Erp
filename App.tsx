@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, auth } from '@appdeploy/client';
+import { supabase } from './src/lib/supabase';
 import {
   BarChart3, BookOpen, Box, Boxes, ChevronLeft, ChevronRight, ClipboardList,
   CreditCard, Database, Download, Edit3, Factory, FileText, Gauge, Lock, Menu, Package, Plus,
@@ -35,36 +35,188 @@ function App(){
   const [authReady,setAuthReady]=useState(false);
 
   const load=async()=>{
+    if(!user)return;
     setLoading(true);
-    try{const res=await api.get('/api/state');setRecords(res.data.records||{});}
-    catch(e){setNotice('Could not load ERP data.');}
-    finally{setLoading(false);}
+    try{
+      const { data, error } = await supabase
+        .from('erp_records')
+        .select('id, table_name, data')
+        .eq('user_id', user.id);
+
+      if(error) throw error;
+
+      const grouped: Record<string,RecordItem[]> = {};
+
+      (data || []).forEach((row:any)=>{
+        if(!grouped[row.table_name]) grouped[row.table_name]=[];
+        grouped[row.table_name].push({
+          id: row.id,
+          ...(row.data || {})
+        });
+      });
+
+      setRecords(grouped);
+    }catch(e){
+      console.error(e);
+      setNotice('Could not load ERP data.');
+    }finally{
+      setLoading(false);
+    }
   };
-  useEffect(()=>{let active=true;(async()=>{try{const u=await auth.getUser();if(active)setUser(u);}catch(e){if(active)setUser(null);}finally{if(active)setAuthReady(true);}})();return()=>{active=false;};},[]);
-  useEffect(()=>{if(user)load();},[user]);
+
+  useEffect(()=>{
+    let active=true;
+
+    (async()=>{
+      const { data:{ user: supabaseUser } } = await supabase.auth.getUser();
+
+      if(active){
+        setUser(
+          supabaseUser
+            ? {
+                id: supabaseUser.id,
+                email: supabaseUser.email,
+                name:
+                  supabaseUser.user_metadata?.full_name ||
+                  supabaseUser.user_metadata?.name ||
+                  supabaseUser.email ||
+                  'User'
+              }
+            : null
+        );
+        setAuthReady(true);
+      }
+    })();
+
+    const { data:{ subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session)=>{
+        if(!active)return;
+
+        const supabaseUser=session?.user;
+
+        setUser(
+          supabaseUser
+            ? {
+                id: supabaseUser.id,
+                email: supabaseUser.email,
+                name:
+                  supabaseUser.user_metadata?.full_name ||
+                  supabaseUser.user_metadata?.name ||
+                  supabaseUser.email ||
+                  'User'
+              }
+            : null
+        );
+
+        setAuthReady(true);
+      }
+    );
+
+    return()=>{
+      active=false;
+      subscription.unsubscribe();
+    };
+  },[]);
+
+  useEffect(()=>{
+    if(user)load();
+  },[user]);
 
   const save=async(table:string,record:Record<string,any>)=>{
+    if(!user)return;
+
     try{
-      await api.post('/api/records',{table,record});
+      const { error } = await supabase
+        .from('erp_records')
+        .insert({
+          user_id: user.id,
+          table_name: table,
+          data: record
+        });
+
+      if(error)throw error;
+
       await load();
       setNotice('Saved successfully.');
-    }catch(e){setNotice('Save failed. Please check the entered data.');}
+    }catch(e){
+      console.error(e);
+      setNotice('Save failed. Please check the entered data.');
+    }
   };
+
   const update=async(table:string,id:string,record:Record<string,any>)=>{
+    if(!user)return;
+
     try{
-      await api.put('/api/records/'+id,{table,record});
-      await load(); setEditRecord(null); setNotice('Updated successfully.');
-    }catch(e){setNotice('Update failed.');}
+      const { error } = await supabase
+        .from('erp_records')
+        .update({data:record})
+        .eq('id',id)
+        .eq('user_id',user.id);
+
+      if(error)throw error;
+
+      await load();
+      setEditRecord(null);
+      setNotice('Updated successfully.');
+    }catch(e){
+      console.error(e);
+      setNotice('Update failed.');
+    }
   };
+
   const remove=async(table:string,id:string)=>{
-    if(!confirm('Move this record to Recycle Bin?')) return;
-    try{const res=await api.delete('/api/records/'+encodeURIComponent(table)+'/'+encodeURIComponent(id));if(res.data?.ok!==true)throw new Error(res.data?.message||'Delete was not completed.');await load();setNotice('Moved to Recycle Bin.');}
-    catch(e:any){const msg=e?.response?.data?.message||e?.message||'Delete failed.';setNotice('Delete failed: '+msg);}
+    if(!user)return;
+    if(!confirm('Move this record to Recycle Bin?'))return;
+
+    try{
+      const { data: record, error: fetchError } = await supabase
+        .from('erp_records')
+        .select('table_name,data')
+        .eq('id',id)
+        .eq('user_id',user.id)
+        .single();
+
+      if(fetchError)throw fetchError;
+
+      const { error: recycleError } = await supabase
+        .from('erp_records')
+        .insert({
+          user_id:user.id,
+          table_name:'recycle',
+          data:{
+            originalTable:table,
+            originalId:id,
+            originalRecord:record.data,
+            deletedAt:new Date().toISOString()
+          }
+        });
+
+      if(recycleError)throw recycleError;
+
+      const { error: deleteError } = await supabase
+        .from('erp_records')
+        .delete()
+        .eq('id',id)
+        .eq('user_id',user.id);
+
+      if(deleteError)throw deleteError;
+
+      await load();
+      setNotice('Moved to Recycle Bin.');
+    }catch(e:any){
+      console.error(e);
+      setNotice('Delete failed: '+(e?.message||'Unknown error.'));
+    }
   };
-  const openEdit=(table:string,row:RecordItem)=>{setEditTable(table);setEditRecord(row);};
+
+  const openEdit=(table:string,row:RecordItem)=>{
+    setEditTable(table);
+    setEditRecord(row);
+  };
+
   const filtered=(table:string)=>(records[table]||[]);
   const currentLabel=menu.find(x=>x[1]===page)?.[0]||'Dashboard';
-
   useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),3000);return()=>clearTimeout(t);},[notice]);
 
   if(!authReady)return <div className="pin-gate"><div className="pin-card"><div className="logo">H+</div><h1>HIKER+ ERP</h1><p>Checking your secure Google account…</p></div></div>;
@@ -76,7 +228,7 @@ function App(){
       <header className="topbar">
         <button className="mobile-menu" onClick={()=>window.dispatchEvent(new Event('open-sidebar'))}><Menu size={24}/></button>
         <div><div className="eyebrow">HIKER SHOES • FACTORY OPERATIONS</div><h1>{account ? (account.type==='customer'?'Customer Kata':'Supplier Kata') : currentLabel}</h1></div>
-        <div className="top-actions"><button className="icon-btn" onClick={load} title="Refresh"><RefreshCw size={21}/></button><div className="user-chip"><div className="avatar">{String(user.name||user.email||'H').slice(0,1).toUpperCase()}</div><span>{user.name||user.email}</span><button className="icon-btn" title="Sign out" onClick={async()=>{await auth.signOut();setUser(null);setPinUnlocked(false);}}><LogOut size={19}/></button></div></div>
+        <div className="top-actions"><button className="icon-btn" onClick={load} title="Refresh"><RefreshCw size={21}/></button><div className="user-chip"><div className="avatar">{String(user.name||user.email||'H').slice(0,1).toUpperCase()}</div><span>{user.name||user.email}</span><button className="icon-btn" title="Sign out" onClick={async()=>{await supabase.auth.signOut();setUser(null);setPinUnlocked(false);}}><LogOut size={19}/></button></div></div>
       </header>
       <div className="content">
         {notice&&<div className="notice">{notice}</div>}
@@ -110,12 +262,17 @@ function GoogleLoginGate({onSignedIn}:any){
   const signIn=async()=>{
     setBusy(true);setError('');
     try{
-      const result=await auth.signIn({scope:'openid email profile offline_access'});
-      onSignedIn(result.user);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider:'google',
+        options:{
+          redirectTo:window.location.origin
+        }
+      });
+
+      if(error)throw error;
     }catch(e:any){
-      if(e?.code==='popup_blocked')setError('Please allow the Google sign-in popup and try again.');
-      else if(e?.code==='popup_closed')setError('Google sign-in was cancelled.');
-      else setError('Google sign-in could not be completed. Please try again.');
+      console.error(e);
+      setError('Google sign-in could not be started. Please try again.');
     }finally{setBusy(false);}
   };
   return <div className="pin-gate"><div className="pin-card"><div className="logo">H+</div><h1>HIKER+ ERP</h1><p>Sign in with your Google account. Each Google account has its own private ERP workspace and data.</p><button className="primary full" onClick={signIn} disabled={busy}>{busy?'Signing in…':'Continue with Google'}</button>{error&&<div className="pin-error">{error}</div>}<small style={{display:'block',marginTop:14}}>Your ERP records stay in the cloud and are separated by Google account. The same Google account can use the same workspace on another device.</small></div></div>;
@@ -199,7 +356,55 @@ function ReadyShoes({records,save,remove,openEdit}:any){
       {rows.map((r:any)=><tr key={r.id}><td><b>{r.article}</b></td><td>{r.cartonType}</td><td>{r.cartons}</td><td>{Number(r.availablePairs??r.totalPairs??0).toLocaleString()}</td><td>{r.productionId?'Production':'Manual'}</td><td><RecordActions onEdit={()=>openEdit('readyShoes',r)} onDelete={()=>remove('readyShoes',r.id)}/></td></tr>)}
     </tbody></table>{!rows.length&&<Empty text="No ready shoes found."/>}</div></div>
   </div>;
+    }
+
+
+    if(id==='__new__'){
+      setSelectedId('');
+      setIsNew(true);
+      setF(v=>({...v,name:'',article:'',unit:units[0]||'',quantity:'',price:''}));
+      return;
+    }
+    const row=matching.find(r=>r.id===id);
+    if(!row)return;
+    setSelectedId(id);
+    setIsNew(false);
+    setF(v=>({...v,name:row.name||'',article:row.article||'',unit:row.unit||units[0]||'',quantity:'',price:''}));
+  };
+  const mult=bagPairs[f.unit]||cartonPairs[f.unit]||1;
+  const pairs=(Number(f.quantity)||0)*mult;
+  const total=f.unit.includes('bag')?pairs*(Number(f.price)||0):(Number(f.quantity)||0)*(Number(f.price)||0);
+  const canSave=Boolean(f.supplier.trim()&&f.name.trim()&&f.quantity&&Number(f.quantity)>0&&f.price!==''&&Number(f.price)>=0);
+  return <div><PageTitle title="Purchases" sub="Select a Raw Stock category first. Existing Raw Stock items can fill the purchase name, article and unit automatically; choose New Item when the material is not yet in Raw Stock."/>
+    <div className="panel"><div className="panel-head"><div><b>Purchase Register</b><small>{(records.purchases||[]).length} records</small></div><button className="primary" onClick={()=>{setCategory(categories[0]||'Uppers');applyCategory(categories[0]||'Uppers');}}><Plus size={18}/> New Purchase</button></div>
+    <div className="form-panel"><div className="form-grid">
+      <Input label="Supplier" value={f.supplier} onChange={v=>setF({...f,supplier:v})}/>
+      <Select label="Raw Stock Category" value={category} options={categories} onChange={applyCategory}/>
+      <Select label="Raw Stock Item" value={isNew?'__new__':selectedId||'__new__'} options={[...(matching.map((r:any)=>({value:r.id,label:(r.name||'Unnamed')+(r.article?' • '+r.article:'')}))),{value:'__new__',label:'＋ New Item / Not in Raw Stock'}]} onChange={applyItem}/>
+      <Input label="Name / material" value={f.name} onChange={v=>setF({...f,name:v})}/>
+      <Input label="Article" value={f.article} onChange={v=>setF({...f,article:v})}/>
+      <Select label="Unit" value={f.unit} options={units} onChange={v=>setF({...f,unit:v})}/>
+      <Input label="Quantity" type="number" value={f.quantity} onChange={v=>setF({...f,quantity:v})}/>
+      <Input label={f.unit.includes('bag')?'Price per pair':'Price'} type="number" value={f.price} onChange={v=>setF({...f,price:v})}/>
+      <div className="calc">Category: <b>{category}</b> • {isNew?'New Raw Stock item':'Existing Raw Stock item'} • Converted pairs: <b>{pairs.toLocaleString()}</b> • Total: <b>PKR {total.toLocaleString()}</b></div>
+      <button className="primary full" disabled={!canSave} onClick={async()=>{
+        await save('purchases',{...f,category,pairs,total,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()});
+      }}><Plus size={18}/> Save Purchase to {category}</button>
+    </div></div></div>
+    <SimpleTable title="" table="purchases" rows={records.purchases||[]} remove={remove} openEdit={openEdit}/>
+  </div>;
 }
+
+
+
+
+
+
+
+
+
+
+  
 
 function ReadyForm({save}:any){
   const [f,setF]=useState({name:'',article:'',cartonType:'24 pairs',cartons:''});const pairs=(Number(f.cartons)||0)*cartonPairs[f.cartonType];
@@ -306,41 +511,7 @@ function LegacyPurchases({records,save,remove,openEdit}:any){
     }
   };
   const applyItem=(id:string)=>{
-    if(id==='__new__'){
-      setSelectedId('');
-      setIsNew(true);
-      setF(v=>({...v,name:'',article:'',unit:units[0]||'',quantity:'',price:''}));
-      return;
-    }
-    const row=matching.find(r=>r.id===id);
-    if(!row)return;
-    setSelectedId(id);
-    setIsNew(false);
-    setF(v=>({...v,name:row.name||'',article:row.article||'',unit:row.unit||units[0]||'',quantity:'',price:''}));
-  };
-  const mult=bagPairs[f.unit]||cartonPairs[f.unit]||1;
-  const pairs=(Number(f.quantity)||0)*mult;
-  const total=f.unit.includes('bag')?pairs*(Number(f.price)||0):(Number(f.quantity)||0)*(Number(f.price)||0);
-  const canSave=Boolean(f.supplier.trim()&&f.name.trim()&&f.quantity&&Number(f.quantity)>0&&f.price!==''&&Number(f.price)>=0);
-  return <div><PageTitle title="Purchases" sub="Select a Raw Stock category first. Existing Raw Stock items can fill the purchase name, article and unit automatically; choose New Item when the material is not yet in Raw Stock."/>
-    <div className="panel"><div className="panel-head"><div><b>Purchase Register</b><small>{(records.purchases||[]).length} records</small></div><button className="primary" onClick={()=>{setCategory(categories[0]||'Uppers');applyCategory(categories[0]||'Uppers');}}><Plus size={18}/> New Purchase</button></div>
-    <div className="form-panel"><div className="form-grid">
-      <Input label="Supplier" value={f.supplier} onChange={v=>setF({...f,supplier:v})}/>
-      <Select label="Raw Stock Category" value={category} options={categories} onChange={applyCategory}/>
-      <Select label="Raw Stock Item" value={isNew?'__new__':selectedId||'__new__'} options={[...(matching.map((r:any)=>({value:r.id,label:(r.name||'Unnamed')+(r.article?' • '+r.article:'')}))),{value:'__new__',label:'＋ New Item / Not in Raw Stock'}]} onChange={applyItem}/>
-      <Input label="Name / material" value={f.name} onChange={v=>setF({...f,name:v})}/>
-      <Input label="Article" value={f.article} onChange={v=>setF({...f,article:v})}/>
-      <Select label="Unit" value={f.unit} options={units} onChange={v=>setF({...f,unit:v})}/>
-      <Input label="Quantity" type="number" value={f.quantity} onChange={v=>setF({...f,quantity:v})}/>
-      <Input label={f.unit.includes('bag')?'Price per pair':'Price'} type="number" value={f.price} onChange={v=>setF({...f,price:v})}/>
-      <div className="calc">Category: <b>{category}</b> • {isNew?'New Raw Stock item':'Existing Raw Stock item'} • Converted pairs: <b>{pairs.toLocaleString()}</b> • Total: <b>PKR {total.toLocaleString()}</b></div>
-      <button className="primary full" disabled={!canSave} onClick={async()=>{
-        await save('purchases',{...f,category,pairs,total,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()});
-      }}><Plus size={18}/> Save Purchase to {category}</button>
-    </div></div></div>
-    <SimpleTable title="" table="purchases" rows={records.purchases||[]} remove={remove} openEdit={openEdit}/>
-  </div>;
-}
+
 
 function Invoices({records,save,remove,openEdit}:any){
   const [f,setF]=useState({customer:'',article:'',cartonType:'24 pairs',cartons:'',price:''}),[showForm,setShowForm]=useState(false);
@@ -453,6 +624,7 @@ function AccountDetail({type,name,records,onBack}:any){
   if(customer){
     invs.filter((r:any)=>same(r.customer,name)).forEach((r:any)=>rows.push({date:r.date,time:r.time,sort:r.createdAt||r.date,type:'invoice',title:r.invoiceNumber||'Invoice',detail:r.article+' • '+r.cartons+' '+r.cartonType+' • '+r.pairs+' pairs',credit:0,debit:Number(r.total||0)}));
     pays.filter((r:any)=>r.type==='Customer'&&same(r.name,name)).forEach((r:any)=>rows.push({date:r.date,time:r.time,sort:r.createdAt||r.date,type:'payment',title:'Customer Payment',detail:(r.paymentMethod||'Cash')+' • '+(r.note||'Payment received'),credit:Number(r.amount||0),debit:0}));
+
   }else{
     purchases.filter((r:any)=>same(r.supplier,name)).forEach((r:any)=>rows.push({date:r.date,time:r.time,sort:r.createdAt||r.date,type:'purchase',title:'Purchase',detail:r.name+' • '+(r.article||'')+' • '+(r.pairs||r.quantity)+' pairs',credit:Number(r.total||0),debit:0}));
     pays.filter((r:any)=>r.type==='Supplier'&&same(r.name,name)).forEach((r:any)=>rows.push({date:r.date,time:r.time,sort:r.createdAt||r.date,type:'payment',title:'Supplier Payment',detail:(r.paymentMethod||'Cash')+' • '+(r.note||'Payment to supplier'),credit:0,debit:Number(r.amount||0)}));
@@ -481,16 +653,81 @@ function Reports({records}:any){
   const rows=[['Raw Stock',records.rawStock||[]],['Ready Shoes',records.readyShoes||[]],['Production',records.production||[]],['Purchases',records.purchases||[]],['Sales',records.sales||[]],['Invoices',records.invoices||[]],['Customers',records.customers||[]],['Suppliers',records.suppliers||[]],['Payments',records.payments||[]],['Kharcha',records.expenses||[]]];
   return <div><PageTitle title="Reports" sub="Reports from each ERP menu."/><div className="report-grid">{rows.map(([n,r]:any)=><div className="report-card" key={n}><BarChart3 size={20}/><b>{n}</b><strong>{r.length}</strong><small>Records available</small></div>)}</div></div>;
 }
+
 function SettingsPage(){
   const [pin,setPin]=useState(localStorage.getItem('hiker_pin')||'1234'),[saved,setSaved]=useState(false);
   const savePin=()=>{if(/^\\d{4,8}$/.test(pin)){localStorage.setItem('hiker_pin',pin);setSaved(true);setTimeout(()=>setSaved(false),2000);}};
-  return <div><PageTitle title="Settings" sub="HIKER+ system preferences and security."/><div className="panel settings-list">{['Company name: HIKER SHOES','Currency: PKR','Carton units: 12 / 18 / 24 pairs','Upper bags: 100 / 150 pairs','Raw Stock categories: Uppers / Chemical / Manual'].map(x=><div className="list-row" key={x}><span>{x}</span><ChevronRight size={18}/></div>)}</div><div className="panel"><div className="panel-head"><div><b>App PIN</b><small>Change the PIN required before opening the ERP.</small></div><Lock size={20}/></div><div className="form-grid"><Input label="New PIN (4–8 digits)" type="password" value={pin} onChange={setPin}/><button className="primary" onClick={savePin}>Save PIN</button>{saved&&<div className="calc">PIN changed successfully.</div>}</div></div></div>;}
+  return <div><PageTitle title="Settings" sub="HIKER+ system preferences and security."/><div className="panel settings-list">{['Company name: HIKER SHOES','Currency: PKR','Carton units: 12 / 18 / 24 pairs','Upper bags: 100 / 150 pairs','Raw Stock categories: Uppers / Chemical / Manual'].map(x=><div className="list-row" key={x}><span>{x}</span><ChevronRight size={18}/></div>)}</div><div className="panel"><div className="panel-head"><div><b>App PIN</b><small>Change the PIN required before opening the ERP.</small></div><Lock size={20}/></div><div className="form-grid"><Input label="New PIN (4–8 digits)" type="password" value={pin} onChange={setPin}/><button className="primary" onClick={savePin}>Save PIN</button>{saved&&<div className="calc">PIN changed successfully.</div>}</div></div></div>;
+}
 
 function Recycle({records,load,setNotice}:any){
   const rows=records.recycle||[];
-  const restore=async(id:string)=>{await api.post('/api/recycle/restore',{id});await load();};
-  const purge=async(id:string)=>{if(confirm('Permanently delete this record? This cannot be undone.')){try{await api.delete('/api/recycle/'+id);await load();}catch(e:any){setNotice('Permanent delete failed: '+(e?.response?.data?.message||e?.message||'Unknown error'));}}};
-  return <div><PageTitle title="Recycle Bin" sub="Deleted records are kept here first. Restore returns them to their original menu."/><div className="panel">{rows.length?rows.map((r:any)=><div className="recycle-row" key={r.id}><div><b>{r.record?.invoiceNumber||r.record?.name||r.record?.article||r.originalTable}</b><small>{r.originalTable} • deleted {r.deletedAt}</small></div><div><button className="restore" onClick={()=>restore(r.id)}><RotateCcw size={16}/> Restore</button><button className="danger" onClick={()=>purge(r.id)}><Trash2 size={16}/> Delete</button></div></div>):<Empty text="Recycle Bin is empty."/>}</div></div>;
+
+  const restore=async(id:string)=>{
+    try{
+      const {data:recycleRecord,error:fetchError}=await supabase
+        .from('erp_records')
+        .select('data')
+        .eq('id',id)
+        .eq('table_name','recycle')
+        .single();
+
+      if(fetchError)throw fetchError;
+
+      const originalTable=recycleRecord.data?.originalTable;
+      const originalRecord=recycleRecord.data?.originalRecord;
+
+      if(!originalTable||!originalRecord){
+        throw new Error('Original record information is missing.');
+      }
+
+      const {error:insertError}=await supabase
+        .from('erp_records')
+        .insert({
+          user_id:(await supabase.auth.getUser()).data.user?.id,
+          table_name:originalTable,
+          data:originalRecord
+        });
+
+      if(insertError)throw insertError;
+
+      const {error:deleteError}=await supabase
+        .from('erp_records')
+        .delete()
+        .eq('id',id)
+        .eq('table_name','recycle');
+
+      if(deleteError)throw deleteError;
+
+      await load();
+      setNotice('Record restored successfully.');
+    }catch(e:any){
+      console.error(e);
+      setNotice('Restore failed: '+(e?.message||'Unknown error'));
+    }
+  };
+
+  const purge=async(id:string)=>{
+    if(!confirm('Permanently delete this record? This cannot be undone.'))return;
+
+    try{
+      const {error}=await supabase
+        .from('erp_records')
+        .delete()
+        .eq('id',id)
+        .eq('table_name','recycle');
+
+      if(error)throw error;
+
+      await load();
+      setNotice('Record permanently deleted.');
+    }catch(e:any){
+      console.error(e);
+      setNotice('Permanent delete failed: '+(e?.message||'Unknown error'));
+    }
+  };
+
+  return <div><PageTitle title="Recycle Bin" sub="Deleted records are kept here first. Restore returns them to their original menu."/><div className="panel">{rows.length?rows.map((r:any)=><div className="recycle-row" key={r.id}><div><b>{r.data?.originalRecord?.invoiceNumber||r.data?.originalRecord?.name||r.data?.originalRecord?.article||r.data?.originalTable||r.originalTable}</b><small>{r.data?.originalTable||r.originalTable} • deleted {r.data?.deletedAt||r.deletedAt}</small></div><div><button className="restore" onClick={()=>restore(r.id)}><RotateCcw size={16}/> Restore</button><button className="danger" onClick={()=>purge(r.id)}><Trash2 size={16}/> Delete</button></div></div>):<Empty text="Recycle Bin is empty."/>}</div></div>;
 }
 
 function DatabasePage({records,setNotice}:any){
