@@ -108,3 +108,25 @@ button.secondary:hover,
   background: #F7F6F3 !important;
 }
 
+/* Forms and inputs */
+input,
+select,
+textarea {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--orange) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--orange-light) !important;
+}
