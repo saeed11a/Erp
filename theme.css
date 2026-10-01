@@ -28,3 +28,50 @@ body {
   background: var(--sidebar-bg) !important;
   border-right: none !important;
 }
+/* Global page styling */
+.main-content,
+.content,
+.page-content {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Cards */
+.card,
+.stat-card,
+.metric-card,
+.panel,
+.section-card,
+.module-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(32, 35, 43, 0.04) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Main text */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary) !important;
+}
+
+/* Secondary text */
+p,
+label,
+small,
+.muted,
+.secondary-text {
+  color: var(--text-secondary);
+}
+
+/* Borders */
+table,
+th,
+td {
+  border-color: var(--border) !important;
+}
