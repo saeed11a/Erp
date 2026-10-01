@@ -220,9 +220,15 @@ function GoogleLoginGate({onSignedIn}:any){
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   const signIn=async()=>{
     setBusy(true);setError('');
-    try{
-      const result=await auth.signIn({scope:'openid email profile offline_access'});
-      onSignedIn(result.user);
+try{
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+
+  if (error) throw error;
     }catch(e:any){
       if(e?.code==='popup_blocked')setError('Please allow the Google sign-in popup and try again.');
       else if(e?.code==='popup_closed')setError('Google sign-in was cancelled.');
