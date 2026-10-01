@@ -443,6 +443,7 @@ function Purchases({records,save,remove,openEdit}:any){
   const purchaseRows=Array.isArray(records?.purchases)?records.purchases:[];
   const categories=useMemo(()=>{const s=new Set<string>(['Uppers','Chemical','Other']);rawRows.forEach((r:any)=>{const c=String(r?.category||'').trim();if(c)s.add(c);});return Array.from(s);},[rawRows]);
   const [category,setCategory]=useState('Uppers');
+ const [showPurchaseForm,setShowPurchaseForm]=useState(false);
   const matching=useMemo(()=>rawRows.filter((r:any)=>String(r?.category||'').trim().toLowerCase()===category.toLowerCase()),[rawRows,category]);
   const [selectedId,setSelectedId]=useState('');
   const [isNew,setIsNew]=useState(true);
@@ -466,7 +467,7 @@ function Purchases({records,save,remove,openEdit}:any){
     <Plus size={18}/> New Purchase
   </button>
 </div>
-      <div className="form-panel"><div className="form-grid">
+      {showPurchaseForm && <div className="form-panel"><div className="form-grid">
         <Input label="Supplier" value={f.supplier} onChange={(v:string)=>setF({...f,supplier:v})}/>
         <Select label="Raw Stock Category" value={category} options={categories} onChange={chooseCategory}/>
         <Select label="Raw Stock Item" value={isNew?'__new__':selectedId||'__new__'} options={[...matching.map((r:any)=>({value:String(r.id),label:String(r.name||'Unnamed')+(r.article?' • '+String(r.article):'')})),{value:'__new__',label:'＋ New Item / Not in Raw Stock'}].map((o:any)=>o.value)} onChange={chooseItem}/>
@@ -477,7 +478,7 @@ function Purchases({records,save,remove,openEdit}:any){
         <Input label={f.unit.includes('bag')?'Price per pair':'Price'} type="number" value={f.price} onChange={(v:string)=>setF({...f,price:v})}/>
         <div className="calc">Category: <b>{category}</b> • {isNew?'New Raw Stock item':'Existing Raw Stock item'} • Converted pairs: <b>{pairs.toLocaleString()}</b> • Total: <b>PKR {total.toLocaleString()}</b></div>
         <button className="primary full" disabled={!valid} onClick={async()=>{await save('purchases',{...f,category,pairs,total,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()});}}><Plus size={18}/> Save Purchase</button>
-      </div></div>
+      </div></div> }
     </div>
     <SimpleTable title="Purchase Register" table="purchases" rows={purchaseRows} remove={remove} openEdit={openEdit}/>
   </div>;
