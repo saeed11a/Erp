@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Each Google account sees its own empty workspace",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": ["Google sign-in", "per-account workspace isolation", "private cloud data"],
+    "description": "Verifies a signed-in Google account is mapped to its own HIKER ERP workspace rather than another account's dataset.",
+    "steps": ["Open HIKER+ ERP", "Sign in with Google Account A", "Enter the ERP PIN", "Open Dashboard"],
+    "expected": "Account A can enter its own ERP workspace and only records belonging to Account A are loaded."
+  },
+  {
+    "name": "Create a purchase from an existing Raw Stock item",
+    "viewport": "desktop",
+    "covers": ["Purchase", "Raw Stock Category", "Raw Stock Item selection", "name and article auto-fill", "purchase-to-raw-stock flow"],
+    "description": "Verifies selecting a Raw Stock category and existing item fills the purchase details and saves the purchase into the selected category.",
+    "setup": ["Create a Raw Stock Uppers item named Upper Test with article ART-001 and unit 100 pairs/bag"],
+    "steps": ["Open Purchases", "Start a New Purchase", "Select Raw Stock Category Uppers", "Select Upper Test", "Enter supplier, quantity and price", "Save Purchase"],
+    "expected": "The name, article and unit come from the selected Raw Stock item, the purchase keeps category Uppers, and the purchase appears in the Purchase Register."
+  },
+  {
+    "name": "Create a new purchase item when Raw Stock has no matching item",
+    "viewport": "mobile",
+    "covers": ["Purchases", "new Raw Stock item", "category selection", "manual name and article entry", "purchase validation"],
+    "description": "Verifies a category with no matching Raw Stock item lets the user choose New Item and enter the purchase name and article manually.",
+    "steps": ["Open Purchases", "Select a Raw Stock category with no matching item", "Choose New Item / Not in Raw Stock", "Enter a new name and article, supplier, quantity and price", "Save Purchase"],
+    "expected": "The purchase saves with the selected category and the manually entered name and article."
+  },
+  {
+    "name": "Records created by one Google account do not appear in another",
+    "viewport": "desktop",
+    "covers": ["workspace-scoped create", "cross-account data isolation", "database state"],
+    "description": "Verifies an ERP record created by Account A is not returned to Account B.",
+    "steps": ["Sign in as Google Account A", "Create a customer named Account A Customer", "Sign out", "Sign in as Google Account B", "Open Customers Kata"],
+    "expected": "Account B does not see Account A Customer, while Account A still sees its own customer after signing back in."
+  },
+  {
+    "name": "Deleting data in one Google account does not delete another account's data",
+    "viewport": "desktop",
+    "covers": ["workspace-scoped delete", "delete isolation", "cross-account persistence"],
+    "description": "Verifies destructive operations are authorized against the signed-in workspace and cannot target another account's record.",
+    "steps": ["Sign in as Google Account A and create Customer A", "Sign in as Google Account B and create Customer B", "Delete Customer B", "Sign out and sign in as Account A", "Open Customers Kata"],
+    "expected": "Customer B is deleted only from Account B, and Customer A remains available to Account A."
+  }
+]
