@@ -37,6 +37,40 @@ jobs:
       - name: Install Capacitor Android
         run: npx cap add android
 
+      - name: Configure Google OAuth deep link
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          text = manifest.read_text()
+
+          marker = '<activity android:name=".MainActivity"'
+          intent_filter = '''
+              <intent-filter>
+                  <action android:name="android.intent.action.VIEW" />
+                  <category android:name="android.intent.category.DEFAULT" />
+                  <category android:name="android.intent.category.BROWSABLE" />
+                  <data android:scheme="com.hiker.shoesfactory" android:host="login-callback" />
+              </intent-filter>
+          '''
+
+          if intent_filter.strip() not in text:
+              pos = text.find(marker)
+              if pos == -1:
+                  raise SystemExit("MainActivity not found in AndroidManifest.xml")
+
+              end = text.find(">", pos)
+              if end == -1:
+                  raise SystemExit("Could not find MainActivity opening tag")
+
+              end += 1
+              text = text[:end] + intent_filter + text[end:]
+              manifest.write_text(text)
+
+          print("Google OAuth deep link configured.")
+          PY
+
       - name: Sync Capacitor
         run: npx cap sync android
 
