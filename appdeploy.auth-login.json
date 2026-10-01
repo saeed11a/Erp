@@ -1,0 +1,15 @@
+{
+  "methods": [
+    "google"
+  ],
+  "headline": "HIKER+ ERP",
+  "subtitle": "Private factory ERP — sign in with your Google account.",
+  "style": {
+    "mode": "light",
+    "accentColor": "#111827",
+    "backgroundColor": "#f3f4f6",
+    "panelColor": "#ffffff",
+    "textColor": "#111827",
+    "borderRadius": 14
+  }
+}
