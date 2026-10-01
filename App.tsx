@@ -476,9 +476,28 @@ function Purchases({records,save,remove,openEdit}:any){
         <Select label="Unit" value={f.unit} options={units} onChange={(v:string)=>setF({...f,unit:v})}/>
         <Input label="Quantity" type="number" value={f.quantity} onChange={(v:string)=>setF({...f,quantity:v})}/>
         <Input label={f.unit.includes('bag')?'Price per pair':'Price'} type="number" value={f.price} onChange={(v:string)=>setF({...f,price:v})}/>
-        <div className="calc">Category: <b>{category}</b> • {isNew?'New Raw Stock item':'Existing Raw Stock item'} • Converted pairs: <b>{pairs.toLocaleString()}</b> • Total: <b>PKR {total.toLocaleString()}</b></div>
-        <button className="primary full" disabled={!valid} onClick={async()=>{await save('purchases',{...f,category,pairs,total,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()});}}><Plus size={18}/> Save Purchase</button>
-      </div></div> }
+        <div className="calc">Category: <b>{category}</b> • {isNew?'New Raw Stock item':'Existing Raw Stock item'} • Converted pairs: <b>{pairs.toLocaleString()}</b> • Total: <b>PKR {total.toLocaleString()}</b>
+        </div>
+          <button
+  className="primary full"
+  disabled={!valid}
+  onClick={async () => {
+    await save('purchases', {
+      ...f,
+      category,
+      pairs,
+      total,
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString()
+    });
+
+    setShowPurchaseForm(false);
+  }}
+>
+  <Plus size={18} /> Save Purchase
+</button>   
+      </div>
+      </div> }
     </div>
     <SimpleTable title="Purchase Register" table="purchases" rows={purchaseRows} remove={remove} openEdit={openEdit}/>
   </div>;
