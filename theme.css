@@ -250,3 +250,34 @@ a:hover {
     min-height: 42px;
   }
 }
+/* Light form backgrounds */
+form,
+.form,
+.form-card,
+.form-container,
+.form-panel,
+.modal,
+.modal-content,
+.dialog,
+.drawer,
+.purchase-form,
+.purchase-panel {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border-color: #E5E2DD !important;
+  box-shadow: 0 2px 8px rgba(32, 35, 43, 0.04) !important;
+}
+
+/* Form sections */
+.form-section,
+.form-group,
+.field-group {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+}
+
+/* Form labels */
+form label,
+.form label {
+  color: #20232B !important;
+}
