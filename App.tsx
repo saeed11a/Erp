@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, auth } from '@appdeploy/client';
+import { supabase } from './src/lib/supabase';
 import {
   BarChart3, BookOpen, Box, Boxes, ChevronLeft, ChevronRight, ClipboardList,
   CreditCard, Database, Download, Edit3, Factory, FileText, Gauge, Lock, Menu, Package, Plus,
@@ -40,7 +40,35 @@ function App(){
     catch(e){setNotice('Could not load ERP data.');}
     finally{setLoading(false);}
   };
-  useEffect(()=>{let active=true;(async()=>{try{const u=await auth.getUser();if(active)setUser(u);}catch(e){if(active)setUser(null);}finally{if(active)setAuthReady(true);}})();return()=>{active=false;};},[]);
+
+  useEffect(() => {
+  let active = true;
+
+  (async () => {
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+
+    if (active) {
+      setUser(
+        supabaseUser
+          ? {
+              id: supabaseUser.id,
+              email: supabaseUser.email,
+              name:
+                supabaseUser.user_metadata?.full_name ||
+                supabaseUser.user_metadata?.name ||
+                supabaseUser.email ||
+                'User'
+            }
+          : null
+      );
+      setAuthReady(true);
+    }
+  })();
+
+  return () => {
+    active = false;
+  };
+}, []);
   useEffect(()=>{if(user)load();},[user]);
 
   const save=async(table:string,record:Record<string,any>)=>{
