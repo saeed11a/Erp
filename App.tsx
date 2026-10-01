@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
 import { supabase } from './src/lib/supabase';
 import {
   BarChart3, BookOpen, Box, Boxes, ChevronLeft, ChevronRight, ClipboardList,
