@@ -34,12 +34,37 @@ function App(){
   const [user,setUser]=useState<any>(null);
   const [authReady,setAuthReady]=useState(false);
 
-  const load=async()=>{
-    setLoading(true);
-    try{const res=await api.get('/api/state');setRecords(res.data.records||{});}
-    catch(e){setNotice('Could not load ERP data.');}
-    finally{setLoading(false);}
-  };
+  const load = async () => {
+  setLoading(true);
+
+  try {
+    const { data, error } = await supabase
+      .from('erp_records')
+      .select('id, table_name, data');
+
+    if (error) throw error;
+
+    const grouped: Record<string, RecordItem[]> = {};
+
+    (data || []).forEach((row) => {
+      if (!grouped[row.table_name]) {
+        grouped[row.table_name] = [];
+      }
+
+      grouped[row.table_name].push({
+        id: row.id,
+        ...(row.data || {})
+      });
+    });
+
+    setRecords(grouped);
+  } catch (e) {
+    console.error(e);
+    setNotice('Could not load ERP data.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
   let active = true;
@@ -70,25 +95,83 @@ function App(){
   };
 }, []);
   useEffect(()=>{if(user)load();},[user]);
+const save = async (table: string, record: Record<string, any>) => {
+  try {
+    const { error } = await supabase
+      .from('erp_records')
+      .insert({
+        table_name: table,
+        data: record
+      });
 
-  const save=async(table:string,record:Record<string,any>)=>{
-    try{
-      await api.post('/api/records',{table,record});
-      await load();
-      setNotice('Saved successfully.');
-    }catch(e){setNotice('Save failed. Please check the entered data.');}
-  };
-  const update=async(table:string,id:string,record:Record<string,any>)=>{
-    try{
-      await api.put('/api/records/'+id,{table,record});
-      await load(); setEditRecord(null); setNotice('Updated successfully.');
-    }catch(e){setNotice('Update failed.');}
-  };
-  const remove=async(table:string,id:string)=>{
-    if(!confirm('Move this record to Recycle Bin?')) return;
-    try{const res=await api.delete('/api/records/'+encodeURIComponent(table)+'/'+encodeURIComponent(id));if(res.data?.ok!==true)throw new Error(res.data?.message||'Delete was not completed.');await load();setNotice('Moved to Recycle Bin.');}
-    catch(e:any){const msg=e?.response?.data?.message||e?.message||'Delete failed.';setNotice('Delete failed: '+msg);}
-  };
+    if (error) throw error;
+
+    await load();
+    setNotice('Saved successfully.');
+  } catch (e) {
+    console.error(e);
+    setNotice('Save failed. Please check the entered data.');
+  }
+};
+  const update = async (table: string, id: string, record: Record<string, any>) => {
+  try {
+    const { error } = await supabase
+      .from('erp_records')
+      .update({
+        data: record
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    await load();
+    setEditRecord(null);
+    setNotice('Updated successfully.');
+  } catch (e) {
+    console.error(e);
+    setNotice('Update failed.');
+  }
+};
+  const remove = async (table: string, id: string) => {
+  if (!confirm('Move this record to Recycle Bin?')) return;
+
+  try {
+    const { data: record, error: fetchError } = await supabase
+      .from('erp_records')
+      .select('table_name, data')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const { error: recycleError } = await supabase
+      .from('erp_records')
+      .insert({
+        table_name: 'recycle',
+        data: {
+          originalTable: table,
+          originalId: id,
+          originalRecord: record.data,
+          deletedAt: new Date().toISOString()
+        }
+      });
+
+    if (recycleError) throw recycleError;
+
+    const { error: deleteError } = await supabase
+      .from('erp_records')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) throw deleteError;
+
+    await load();
+    setNotice('Moved to Recycle Bin.');
+  } catch (e: any) {
+    console.error(e);
+    setNotice('Delete failed: ' + (e?.message || 'Unknown error.'));
+  }
+};
   const openEdit=(table:string,row:RecordItem)=>{setEditTable(table);setEditRecord(row);};
   const filtered=(table:string)=>(records[table]||[]);
   const currentLabel=menu.find(x=>x[1]===page)?.[0]||'Dashboard';
