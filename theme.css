@@ -1,0 +1,30 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --page-bg: #F7F6F3;
+  --sidebar-bg: #171B27;
+  --card-bg: #FFFFFF;
+
+  --text-primary: #20232B;
+  --text-secondary: #73747A;
+
+  --border: #E5E2DD;
+
+  --orange: #C8752D;
+  --orange-hover: #B86624;
+  --orange-light: #F7EBDD;
+}
+
+body {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.app-shell {
+  background: var(--page-bg) !important;
+}
+
+.sidebar {
+  background: var(--sidebar-bg) !important;
+  border-right: none !important;
+}
