@@ -457,7 +457,15 @@ function Purchases({records,save,remove,openEdit}:any){
   const total=f.unit.includes('bag')?pairs*price:quantity*price;
   const valid=Boolean(f.supplier.trim()&&f.name.trim()&&quantity>0&&f.price!==''&&price>=0);
   return <div><PageTitle title="Purchase" sub="Create purchases from Raw Stock. Choose an existing item to auto-fill details, or create a new item."/>
-    <div className="panel"><div className="panel-head"><div><b>New Purchase</b><small>{purchaseRows.length} purchase records</small></div></div>
+  <div className="panel"><div className="panel-head">
+  <div>
+    <b>Purchase</b>
+    <small>{purchaseRows.length} purchase records</small>
+  </div>
+  <button className="primary" onClick={()=>setShowPurchaseForm(true)}>
+    <Plus size={18}/> New Purchase
+  </button>
+</div>
       <div className="form-panel"><div className="form-grid">
         <Input label="Supplier" value={f.supplier} onChange={(v:string)=>setF({...f,supplier:v})}/>
         <Select label="Raw Stock Category" value={category} options={categories} onChange={chooseCategory}/>
