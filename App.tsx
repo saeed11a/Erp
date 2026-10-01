@@ -96,14 +96,12 @@ function App(){
     setLoading(false);
   }
 };
-
   useEffect(() => {
-  let active = true;
+    let active = true;
 
-  (async () => {
-    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+    const updateUser = (supabaseUser: any) => {
+      if (!active) return;
 
-    if (active) {
       setUser(
         supabaseUser
           ? {
@@ -117,14 +115,29 @@ function App(){
             }
           : null
       );
-      setAuthReady(true);
-    }
-  })();
 
-  return () => {
-    active = false;
-  };
-}, []);
+      setAuthReady(true);
+    };
+
+    (async () => {
+      const {
+        data: { user: supabaseUser }
+      } = await supabase.auth.getUser();
+
+      updateUser(supabaseUser);
+    })();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      updateUser(session?.user ?? null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
   useEffect(()=>{if(user)load();},[user]);
 const save = async (table: string, record: Record<string, any>) => {
   try {
@@ -255,7 +268,7 @@ try{
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin
+      redirectTo: 'com.hiker.shoesfactory://login-callback'
     }
   });
 
