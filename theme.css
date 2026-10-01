@@ -75,3 +75,36 @@ th,
 td {
   border-color: var(--border) !important;
 }
+/* Buttons */
+button,
+.btn,
+.primary {
+  border-radius: 8px !important;
+}
+
+button.primary,
+.primary {
+  background: var(--orange) !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--orange) !important;
+}
+
+button.primary:hover,
+.primary:hover {
+  background: var(--orange-hover) !important;
+}
+
+button.secondary,
+.secondary,
+.btn-secondary {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+button.secondary:hover,
+.secondary:hover,
+.btn-secondary:hover {
+  background: #F7F6F3 !important;
+}
+
