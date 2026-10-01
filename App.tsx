@@ -24,7 +24,7 @@ const bagPairs: Record<string,number> = {'100 pairs/bag':100,'150 pairs/bag':150
 const paymentMethods = ['Cash','Bank','Cheque','JazzCash','EasyPaisa','Account'];
 
 function App(){
-    useEffect(() => {
+      useEffect(() => {
     const handleDeepLink = async (event: any) => {
       const url = event.url;
 
@@ -34,17 +34,29 @@ function App(){
 
       const hash = url.split('#')[1];
 
-      if (!hash) return;
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
 
-      const params = new URLSearchParams(hash);
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({
+            access_token,
+            refresh_token,
+          });
+          return;
+        }
+      }
 
-      if (access_token && refresh_token) {
-        await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
+      const query = url.split('?')[1];
+
+      if (query) {
+        const params = new URLSearchParams(query);
+        const code = params.get('code');
+
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        }
       }
     };
 
