@@ -130,3 +130,123 @@ textarea:focus {
   outline: none !important;
   box-shadow: 0 0 0 2px var(--orange-light) !important;
 }
+/* Sidebar navigation */
+.sidebar {
+  background: var(--sidebar-bg) !important;
+  color: #FFFFFF !important;
+}
+
+.sidebar a,
+.sidebar button,
+.nav-item {
+  color: #D7D8DE !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+}
+
+.sidebar a:hover,
+.sidebar button:hover,
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+}
+
+.sidebar .active,
+.sidebar .active a,
+.sidebar .nav-item.active {
+  background: var(--orange) !important;
+  color: #FFFFFF !important;
+}
+
+.sidebar svg {
+  color: currentColor !important;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  background: #FFFFFF !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--text-primary) !important;
+}
+
+thead {
+  background: #F3F1ED !important;
+}
+
+th {
+  color: var(--text-secondary) !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+td {
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+tr:hover td {
+  background: #FAF9F7 !important;
+}
+/* Accent colors */
+.text-primary,
+.accent,
+.text-accent {
+  color: var(--orange) !important;
+}
+
+.icon-accent,
+.icon-orange {
+  background: var(--orange-light) !important;
+  color: var(--orange) !important;
+}
+
+/* Important values */
+.amount,
+.total,
+.stat-value {
+  color: var(--text-primary) !important;
+}
+
+/* Links */
+a {
+  color: var(--orange);
+}
+
+a:hover {
+  color: var(--orange-hover);
+  }
+/* Mobile */
+@media (max-width: 768px) {
+  .app-shell {
+    background: var(--page-bg) !important;
+  }
+
+  .sidebar {
+    background: var(--sidebar-bg) !important;
+  }
+
+  .card,
+  .stat-card,
+  .metric-card,
+  .panel,
+  .section-card,
+  .module-card {
+    border-radius: 10px !important;
+  }
+
+  button,
+  .btn {
+    min-height: 42px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 42px;
+  }
+}
