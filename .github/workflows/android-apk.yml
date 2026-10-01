@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Check package.json
         run: |
           echo "===== PACKAGE.JSON ====="
@@ -27,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        
+
       - name: Build web app
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -37,15 +38,18 @@ jobs:
       - name: Install Capacitor Android
         run: npx cap add android
 
+      - name: Sync Capacitor
+        run: npx cap sync android
+
       - name: Configure Google OAuth deep link
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           manifest = Path("android/app/src/main/AndroidManifest.xml")
           text = manifest.read_text()
 
-          marker = '<activity android:name=".MainActivity"'
           intent_filter = '''
               <intent-filter>
                   <action android:name="android.intent.action.VIEW" />
@@ -55,24 +59,36 @@ jobs:
               </intent-filter>
           '''
 
-          if intent_filter.strip() not in text:
-              pos = text.find(marker)
-              if pos == -1:
-                  raise SystemExit("MainActivity not found in AndroidManifest.xml")
+          if 'android:scheme="com.hiker.shoesfactory"' in text:
+              print("Google OAuth deep link already configured.")
+          else:
+              match = re.search(
+                  r'<activity\b[^>]*MainActivity[^>]*>',
+                  text,
+                  re.IGNORECASE
+              )
 
-              end = text.find(">", pos)
-              if end == -1:
-                  raise SystemExit("Could not find MainActivity opening tag")
+              if not match:
+                  print("MainActivity declaration not found.")
+                  print("===== ANDROID MANIFEST =====")
+                  print(text)
+                  raise SystemExit(1)
 
-              end += 1
-              text = text[:end] + intent_filter + text[end:]
+              insert_at = match.end()
+
+              text = (
+                  text[:insert_at]
+                  + intent_filter
+                  + text[insert_at:]
+              )
+
               manifest.write_text(text)
 
-          print("Google OAuth deep link configured.")
-          PY
+              print("Google OAuth deep link configured.")
 
-      - name: Sync Capacitor
-        run: npx cap sync android
+          print("===== FINAL ANDROID MANIFEST CHECK =====")
+          print(manifest.read_text())
+          PY
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -80,7 +96,6 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
