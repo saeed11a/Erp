@@ -24,6 +24,36 @@ const bagPairs: Record<string,number> = {'100 pairs/bag':100,'150 pairs/bag':150
 const paymentMethods = ['Cash','Bank','Cheque','JazzCash','EasyPaisa','Account'];
 
 function App(){
+    useEffect(() => {
+    const handleDeepLink = async (event: any) => {
+      const url = event.url;
+
+      if (!url.startsWith('com.hiker.shoesfactory://login-callback')) {
+        return;
+      }
+
+      const hash = url.split('#')[1];
+
+      if (!hash) return;
+
+      const params = new URLSearchParams(hash);
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+
+      if (access_token && refresh_token) {
+        await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+      }
+    };
+
+    const listener = CapacitorApp.addListener('appUrlOpen', handleDeepLink);
+
+    return () => {
+      listener.then(handle => handle.remove());
+    };
+  }, []);
   const [page,setPage]=useState('dashboard');
   const [records,setRecords]=useState<Record<string,RecordItem[]>>({});
   const [loading,setLoading]=useState(true);
