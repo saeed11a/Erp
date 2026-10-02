@@ -107,11 +107,11 @@ jobs:
           from pathlib import Path
           import shutil
 
-          source = Path("public/hiker-logo.png")
+          source = Path("Public/hiker-logo.png")
           res = Path("android/app/src/main/res")
 
           if not source.exists():
-              raise SystemExit("public/hiker-logo.png was not found.")
+              raise SystemExit("Public/hiker-logo.png was not found.")
 
           for folder in ["mipmap-hdpi", "mipmap-mdpi", "mipmap-xhdpi", "mipmap-xxhdpi", "mipmap-xxxhdpi"]:
               target = res / folder
@@ -126,6 +126,8 @@ jobs:
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleDebug
+
+        
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
