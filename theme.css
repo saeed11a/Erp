@@ -281,3 +281,184 @@ form label,
 .form label {
   color: #20232B !important;
 }
+
+/* =========================================================
+   HIKER LIGHT THEME - FORMS, CALCULATIONS, TABLES & MODALS
+   ========================================================= */
+
+.form-panel,
+.form-card,
+.form-container,
+.form-section,
+.form-group,
+.field-group,
+.purchase-form,
+.purchase-panel,
+.modal,
+.modal-content,
+.dialog,
+.dialog-content,
+.drawer,
+.drawer-content {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border-color: #E5E2DD !important;
+}
+
+/* Calculation / summary areas */
+.calc,
+.calculation,
+.calculation-box,
+.summary,
+.summary-box,
+.total-box,
+.form-summary {
+  background: #F7EBDD !important;
+  color: #20232B !important;
+  border: 1px solid #E5E2DD !important;
+  border-radius: 8px !important;
+}
+
+.calc b,
+.calculation b,
+.calculation-box b,
+.summary b,
+.summary-box b,
+.total-box b,
+.form-summary b {
+  color: #C8752D !important;
+}
+
+/* All form controls */
+.form-panel input,
+.form-panel select,
+.form-panel textarea,
+.form-card input,
+.form-card select,
+.form-card textarea,
+.modal input,
+.modal select,
+.modal textarea,
+.dialog input,
+.dialog select,
+.dialog textarea {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border: 1px solid #E5E2DD !important;
+}
+
+/* Tables and their containers */
+.table-wrap,
+.table-container,
+.table-card,
+.table-panel {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border-color: #E5E2DD !important;
+}
+
+.table-wrap table,
+.table-container table,
+.table-card table,
+.table-panel table {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+}
+
+.table-wrap thead,
+.table-container thead,
+.table-card thead,
+.table-panel thead {
+  background: #F3F1ED !important;
+}
+
+.table-wrap th,
+.table-container th,
+.table-card th,
+.table-panel th {
+  background: #F3F1ED !important;
+  color: #73747A !important;
+  border-color: #E5E2DD !important;
+}
+
+.table-wrap td,
+.table-container td,
+.table-card td,
+.table-panel td {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border-color: #E5E2DD !important;
+}
+
+.table-wrap tr:hover td,
+.table-container tr:hover td,
+.table-card tr:hover td,
+.table-panel tr:hover td {
+  background: #FAF9F7 !important;
+}
+
+/* Modal backdrop */
+.modal-backdrop,
+.overlay,
+.dialog-backdrop {
+  background: rgba(23, 27, 39, 0.45) !important;
+}
+
+/* Modal action buttons */
+.modal .primary,
+.dialog .primary,
+.modal button.primary,
+.dialog button.primary {
+  background: #C8752D !important;
+  color: #FFFFFF !important;
+  border-color: #C8752D !important;
+}
+
+.modal .secondary,
+.dialog .secondary {
+  background: #FFFFFF !important;
+  color: #20232B !important;
+  border: 1px solid #E5E2DD !important;
+}
+
+/* Close buttons */
+.modal .icon-btn,
+.dialog .icon-btn {
+  color: #73747A !important;
+  background: transparent !important;
+}
+
+.modal .icon-btn:hover,
+.dialog .icon-btn:hover {
+  background: #F7F6F3 !important;
+  color: #20232B !important;
+}
+
+/* Empty table / empty state */
+.empty,
+.empty-state {
+  background: #FFFFFF !important;
+  color: #73747A !important;
+}
+
+/* Tabs */
+.tabs {
+  background: transparent !important;
+}
+
+.tabs button {
+  background: #FFFFFF !important;
+  color: #73747A !important;
+  border: 1px solid #E5E2DD !important;
+}
+
+.tabs button:hover {
+  background: #F7F6F3 !important;
+  color: #20232B !important;
+}
+
+.tabs button.selected {
+  background: #C8752D !important;
+  color: #FFFFFF !important;
+  border-color: #C8752D !important;
+}
