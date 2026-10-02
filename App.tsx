@@ -481,18 +481,71 @@ function Purchases({records,save,remove,openEdit}:any){
           <button
   className="primary full"
   disabled={!valid}
-  onClick={async () => {
-    await save('purchases', {
-      ...f,
-      category,
-      pairs,
-      total,
-      date: new Date().toISOString().slice(0, 10),
-      createdAt: new Date().toISOString()
-    });
+onClick={async () => {
+  const existing = matching.find(
+    (r: any) =>
+      String(r.name || '').trim().toLowerCase() ===
+        f.name.trim().toLowerCase() &&
+      String(r.article || '').trim().toLowerCase() ===
+        f.article.trim().toLowerCase()
+  );
 
-    setShowPurchaseForm(false);
-  }}
+  const now = new Date().toISOString();
+
+  // 1. Save the purchase
+  await save('purchases', {
+    ...f,
+    category,
+    pairs,
+    total,
+    date: now.slice(0, 10),
+    createdAt: now
+  });
+
+  // 2. Add or update Raw Stock
+  if (existing) {
+    const oldQuantity = Number(existing.quantity) || 0;
+    const oldPairs = Number(
+      existing.availablePairs ?? existing.totalPairs ?? 0
+    );
+
+    const newQuantity = oldQuantity + quantity;
+
+    const newPairs =
+      category === 'Uppers'
+        ? oldPairs + pairs
+        : oldPairs + quantity;
+
+    await update('rawStock', String(existing.id), {
+      ...existing,
+      quantity: newQuantity,
+      totalPairs: newPairs,
+      availablePairs: newPairs,
+      price,
+      unit: f.unit,
+      category,
+      name: f.name,
+      article: f.article,
+      updatedAt: now
+    });
+  } else {
+    await save('rawStock', {
+      name: f.name,
+      article: category === 'Uppers' ? f.article : '',
+      unit: f.unit,
+      quantity,
+      price,
+      minStock: '0',
+      category,
+      totalPairs: category === 'Uppers' ? pairs : quantity,
+      availablePairs: category === 'Uppers' ? pairs : quantity,
+      createdAt: now
+    });
+  }
+
+  setShowPurchaseForm(false);
+}}
+
 >
   <Plus size={18} /> Save Purchase
 </button>   
