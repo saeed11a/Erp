@@ -405,8 +405,63 @@ const remove = async (table: string, id: string) => {
             {page==='database'&&<DatabasePage records={records} load={load} setNotice={setNotice}/>} </>}
       </div>
     </main>
-    {editRecord&&<EditModal table={editTable} record={editRecord} onClose={()=>setEditRecord(null)} onSave={(r)=>update(editTable,editRecord.id,r)}/>}
-  </div>;
+
+{editRecord&&<EditModal
+  table={editTable}
+  record={editRecord}
+  onClose={()=>setEditRecord(null)}
+  onSave={(r)=>update(editTable,editRecord.id,r)}
+/>}
+
+{profileEditOpen && (
+  <div
+    className="profile-edit-overlay"
+    onClick={() => setProfileEditOpen(false)}
+  >
+    <div
+      className="profile-edit-card"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="profile-edit-header">
+        <div>
+          <h2>Edit Profile</h2>
+          <p>Update your profile information.</p>
+        </div>
+
+        <button
+          className="icon-btn"
+          onClick={() => setProfileEditOpen(false)}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <div className="profile-edit-avatar">
+        {user?.avatar ? (
+          <img src={user.avatar} alt="" />
+        ) : (
+          String(user?.name || user?.email || 'H')
+            .slice(0, 1)
+            .toUpperCase()
+        )}
+      </div>
+
+      <div className="profile-edit-info">
+        <strong>{user?.name || 'User'}</strong>
+        <span>{user?.email || ''}</span>
+      </div>
+
+      <button
+        className="primary full"
+        onClick={() => setProfileEditOpen(false)}
+      >
+        Done
+      </button>
+    </div>
+  </div>
+)}
+
+</div>;
 }
 
 function GoogleLoginGate({onSignedIn}:any){
