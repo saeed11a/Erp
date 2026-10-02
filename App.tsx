@@ -324,11 +324,7 @@ const remove = async (table: string, id: string) => {
   <div className="profile-menu">
     <button
       className="profile-trigger"
-      onClick={() =>
-        window.dispatchEvent(
-          new Event('toggle-profile-menu')
-        )
-      }
+      onClick={() => setProfileOpen(v => !v)}
     >
       <div className="profile-avatar">
         {String(user.name||user.email||'H')
@@ -344,7 +340,25 @@ const remove = async (table: string, id: string) => {
         size={16}
         className="profile-chevron"
       />
-    </button>
+        </button>
+
+    {profileOpen && (
+      <div className="profile-dropdown">
+   <button>Profile</button>
+<button>Change Profile</button>
+<button>Switch Account</button>
+<button>Role & Permissions</button>
+<button
+  onClick={async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfileOpen(false);
+  }}
+>
+  Logout
+</button> 
+      </div>
+    )}
   </div>
 </div>
       </header>
