@@ -1360,38 +1360,79 @@ function Recycle({records,load,setNotice}:any){
         {rows.length ? (
           rows.map((r:any) => (
             <div className="recycle-row" key={r.id}>
-              <div>
-                <b>
-                  {r.record?.invoiceNumber ||
-                   r.record?.name ||
-                   r.record?.article ||
-                   r.originalRecord?.invoiceNumber ||
-                   r.originalRecord?.name ||
-                   r.originalRecord?.article ||
-                   r.originalTable}
-                </b>
 
-                <small>
-                  {r.originalTable} • deleted {r.deletedAt}
-                </small>
-              </div>
+  <div className="recycle-record-content">
 
-              <div>
-                <button
-                  className="restore"
-                  onClick={() => restore(r.id)}
+    {(() => {
+      const record = r.originalRecord || r.record || {};
+
+      const recordName =
+        record.name ||
+        record.invoiceNumber ||
+        record.article ||
+        record.customer ||
+        record.supplier ||
+        r.originalTable ||
+        'Deleted Record';
+
+      return (
+        <>
+          <b className="recycle-record-name">
+            {recordName}
+          </b>
+
+          <small className="recycle-record-meta">
+            {r.originalTable} • deleted {r.deletedAt}
+          </small>
+
+          <div className="recycle-record-details">
+            {Object.entries(record).map(
+              ([key, value]: any) => (
+                <div
+                  className="recycle-detail"
+                  key={key}
                 >
-                  <RotateCcw size={16}/> Restore
-                </button>
+                  <span className="recycle-detail-key">
+                    {key}
+                  </span>
 
-                <button
-                  className="danger"
-                  onClick={() => purge(r.id)}
-                >
-                  <Trash2 size={16}/> Delete
-                </button>
-              </div>
-            </div>
+                  <span className="recycle-detail-value">
+                    {typeof value === 'object' &&
+                     value !== null
+                      ? JSON.stringify(value)
+                      : String(value ?? '')}
+                  </span>
+                </div>
+              )
+            )}
+          </div>
+        </>
+      );
+    })()}
+
+  </div>
+
+  <div className="recycle-actions">
+
+    <button
+      className="restore"
+      onClick={() => restore(r.id)}
+    >
+      <RotateCcw size={16}/>
+      Restore
+    </button>
+
+    <button
+      className="danger"
+      onClick={() => purge(r.id)}
+    >
+      <Trash2 size={16}/>
+      Delete
+    </button>
+
+  </div>
+
+</div>
           ))
         ) : (
           <Empty text="Recycle Bin is empty."/>
