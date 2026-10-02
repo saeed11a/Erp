@@ -1328,10 +1328,139 @@ function Reports({records}:any){
   return <div><PageTitle title="Reports" sub="Reports from each ERP menu."/><div className="report-grid">{rows.map(([n,r]:any)=><div className="report-card" key={n}><BarChart3 size={20}/><b>{n}</b><strong>{r.length}</strong><small>Records available</small></div>)}</div></div>;
 }
 function SettingsPage(){
-  const [pin,setPin]=useState(localStorage.getItem('hiker_pin')||'1234'),[saved,setSaved]=useState(false);
-  const savePin=()=>{if(/^\\d{4,8}$/.test(pin)){localStorage.setItem('hiker_pin',pin);setSaved(true);setTimeout(()=>setSaved(false),2000);}};
-  return <div><PageTitle title="Settings" sub="HIKER+ system preferences and security."/><div className="panel settings-list">{['Company name: HIKER SHOES','Currency: PKR','Carton units: 12 / 18 / 24 pairs','Upper bags: 100 / 150 pairs','Raw Stock categories: Uppers / Chemical / Manual'].map(x=><div className="list-row" key={x}><span>{x}</span><ChevronRight size={18}/></div>)}</div><div className="panel"><div className="panel-head"><div><b>App PIN</b><small>Change the PIN required before opening the ERP.</small></div><Lock size={20}/></div><div className="form-grid"><Input label="New PIN (4–8 digits)" type="password" value={pin} onChange={setPin}/><button className="primary" onClick={savePin}>Save PIN</button>{saved&&<div className="calc">PIN changed successfully.</div>}</div></div></div>;}
+  const [companyName,setCompanyName]=useState(
+    localStorage.getItem('hiker_company_name') || 'HIKER SHOES'
+  );
 
+  const [currency,setCurrency]=useState(
+    localStorage.getItem('hiker_currency') || 'PKR'
+  );
+
+  const [cartonUnits,setCartonUnits]=useState(
+    localStorage.getItem('hiker_carton_units') || '12 / 18 / 24 pairs'
+  );
+
+  const [upperBags,setUpperBags]=useState(
+    localStorage.getItem('hiker_upper_bags') || '100 / 150 pairs'
+  );
+
+  const [rawStockCategories,setRawStockCategories]=useState(
+    localStorage.getItem('hiker_raw_stock_categories') ||
+    'Uppers / Chemical / Manual'
+  );
+
+  const [pin,setPin]=useState(
+    localStorage.getItem('hiker_pin') || '1234'
+  );
+
+  const [saved,setSaved]=useState('');
+
+  const saveSetting=(key:string,value:string)=>{
+    localStorage.setItem(key,value);
+    setSaved(key);
+
+    setTimeout(()=>{
+      setSaved('');
+    },2000);
+  };
+
+  const savePin=()=>{
+    if(/^\\d{4,8}$/.test(pin)){
+      localStorage.setItem('hiker_pin',pin);
+      setSaved('pin');
+
+      setTimeout(()=>{
+        setSaved('');
+      },2000);
+    }
+  };
+
+  return (
+    <div>
+
+      <PageTitle
+        title="Settings"
+        sub="HIKER+ system preferences and security."
+      />
+
+      <div className="panel settings-list">
+
+        <div className="list-row">
+          <span>Company name</span>
+
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input
+              value={companyName}
+              onChange={e=>setCompanyName(e.target.value)}
+            />
+
+            <button
+              className="secondary"
+              onClick={()=>
+                saveSetting(
+                  'hiker_company_name',
+                  companyName
+                )
+              }
+            >
+              Save
+            </button>
+          </div>
+        </div>
+
+        {saved==='hiker_company_name'&&(
+          <div className="calc">
+            Company name saved successfully.
+          </div>
+        )}
+
+      </div>
+
+      <div className="panel">
+
+        <div className="panel-head">
+
+          <div>
+            <b>App PIN</b>
+
+            <small>
+              Change the PIN required before opening the ERP.
+            </small>
+          </div>
+
+          <Lock size={20}/>
+
+        </div>
+
+        <div className="form-grid">
+
+          <Input
+            label="New PIN (4–8 digits)"
+            type="password"
+            value={pin}
+            onChange={setPin}
+          />
+
+          <button
+            className="primary"
+            onClick={savePin}
+          >
+            Save PIN
+          </button>
+
+          {saved==='pin'&&(
+            <div className="calc">
+              PIN changed successfully.
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
 function Recycle({records,load,setNotice}:any){
   const rows = records.recycle || [];
 
