@@ -1625,12 +1625,10 @@ function SettingsPage(){
   const [upperBags,setUpperBags]=useState(
     localStorage.getItem('hiker_upper_bags') || '100 / 150 pairs'
   );
-
-  const rawStockCategories,setRawStockCategories]=useState(
-    localStorage.getItem('hiker_raw_stock_categories') ||
-    'Uppers / Chemical / Manual'
-  );
-
+const [rawStockCategories,setRawStockCategories]=useState(
+  localStorage.getItem('hiker_raw_stock_categories') ||
+  'Uppers / Chemical / Other'
+);
   const [pin,setPin]=useState(
     localStorage.getItem('hiker_pin') || '1234'
   );
