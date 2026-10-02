@@ -303,85 +303,138 @@ const remove = async (table: string, id: string) => {
   if(!user)return <GoogleLoginGate onSignedIn={setUser}/>;
   if(!pinUnlocked)return <PinGate onUnlock={()=>setPinUnlocked(true)}/>;
   return <div className="app-shell">
-    <Sidebar page={page} setPage={p=>{setPage(p);setAccount(null);}}/>
-    <main className="main">
-      <header className="topbar">
-        <button className="mobile-menu" onClick={()=>window.dispatchEvent(new Event('open-sidebar'))}><Menu size={24}/></button>
-        <div><div className="eyebrow">HIKER SHOES • FACTORY OPERATIONS</div><h1>{account ? (account.type==='customer'?'Customer Kata':'Supplier Kata') : currentLabel}</h1></div>
-     <div>
-  <div className="eyebrow">HIKER SHOES • FACTORY OPERATIONS</div>
-  <h1>
-    {account
-      ? (account.type==='customer'?'Customer Kata':'Supplier Kata')
-      : currentLabel}
-  </h1>
-</div>
 
-<div className="top-actions">
-  <button
-    className="icon-btn"
-    onClick={load}
-    title="Refresh"
-  >
-    <RefreshCw size={21}/>
-  </button>
+    <Sidebar
+  page={page}
+  setPage={p => {
+    setPage(p);
+    setAccount(null);
+  }}
+/>
 
-  <div className="profile-menu">
+<main className="main">
+
+  <header className="topbar">
+
     <button
-      className="profile-trigger"
-      onClick={() => setProfileOpen(v => !v)}
+      className="mobile-menu"
+      onClick={() =>
+        window.dispatchEvent(new Event('open-sidebar'))
+      }
     >
-      <div className="profile-avatar">
-  {user.avatar ? (
-    <img
-      src={user.avatar}
-      alt=""
-    />
-  ) : (
-    String(user.name || user.email || 'H')
-      .slice(0, 1)
-      .toUpperCase()
-  )}
-</div>
+      <Menu size={24} />
+    </button>
 
-<span className="profile-name">
-  {user.name || user.email}
-</span>
+    <div>
+      <div className="eyebrow">
+        HIKER SHOES • FACTORY OPERATIONS
+      </div>
 
+      <h1>
+        {account
+          ? (account.type === 'customer'
+              ? 'Customer Kata'
+              : 'Supplier Kata')
+          : currentLabel}
+      </h1>
+    </div>
 
-      <ChevronRight
-        size={16}
-        className="profile-chevron"
-      />
+    <div className="top-actions">
+
+      <button
+        className="icon-btn"
+        onClick={load}
+        title="Refresh"
+      >
+        <RefreshCw size={21} />
+      </button>
+
+      <div className="profile-menu">
+
+        <button
+          className="profile-trigger"
+          onClick={() => setProfileOpen(v => !v)}
+        >
+          <div className="profile-avatar">
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt=""
+              />
+            ) : (
+              String(user.name || user.email || 'H')
+                .slice(0, 1)
+                .toUpperCase()
+            )}
+          </div>
+
+          <span className="profile-name">
+            {user.name || user.email}
+          </span>
+
+          <ChevronRight
+            size={16}
+            className="profile-chevron"
+          />
         </button>
 
-    {profileOpen && (
-      <div className="profile-dropdown">
-   <button>Profile</button>
-<button
-  onClick={() => {
-    setProfileEditOpen(true);
-    setProfileOpen(false);
-  }}
->
-  Change Profile
-</button>
-<button>Switch Account</button>
-<button>Role & Permissions</button>
-<button
-  onClick={async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfileOpen(false);
-  }}
->
-  Logout
-</button> 
+        {profileOpen && (
+          <div className="profile-dropdown">
+
+            <button
+              onClick={() => {
+                setProfileOpen(false);
+                setProfileEditOpen(true);
+              }}
+            >
+              Profile
+            </button>
+
+            <button
+              onClick={() => {
+                setProfileOpen(false);
+                setProfileEditOpen(true);
+              }}
+            >
+              Change Profile
+            </button>
+
+            <button
+              onClick={() => {
+                setProfileOpen(false);
+                setNotice('Switch Account will be added next.');
+              }}
+            >
+              Switch Account
+            </button>
+
+            <button
+              onClick={() => {
+                setProfileOpen(false);
+                setNotice('Role & Permissions will be added next.');
+              }}
+            >
+              Role & Permissions
+            </button>
+
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                setUser(null);
+                setProfileOpen(false);
+              }}
+            >
+              Logout
+            </button>
+
+          </div>
+        )}
+
       </div>
-    )}
-  </div>
-</div>
-      </header>
+
+    </div>
+
+  </header>
       <div className="content">
         {notice&&<div className="notice">{notice}</div>}
         {loading?<div className="loading">Loading HIKER ERP…</div>:account?
