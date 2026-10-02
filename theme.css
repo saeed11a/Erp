@@ -696,3 +696,13 @@ hr {
   display: block;
   margin: 0 auto 12px;
 }
+
+/* Black logout icon */
+.icon-btn[title="Sign out"] {
+  color: #20232B !important;
+}
+
+.icon-btn[title="Sign out"] svg {
+  color: #20232B !important;
+  stroke: #20232B !important;
+}
