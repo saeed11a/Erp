@@ -69,6 +69,7 @@ function App(){
   const [page,setPage]=useState('dashboard');
   const [records,setRecords]=useState<Record<string,RecordItem[]>>({});
   const [profileOpen,setProfileOpen]=useState(false);
+  const [profileEditOpen,setProfileEditOpen]=useState(false);
   const [loading,setLoading]=useState(true);
   const [editRecord,setEditRecord]=useState<RecordItem|null>(null);
   const [editTable,setEditTable]=useState('');
@@ -357,7 +358,14 @@ const remove = async (table: string, id: string) => {
     {profileOpen && (
       <div className="profile-dropdown">
    <button>Profile</button>
-<button>Change Profile</button>
+<button
+  onClick={() => {
+    setProfileEditOpen(true);
+    setProfileOpen(false);
+  }}
+>
+  Change Profile
+</button>
 <button>Switch Account</button>
 <button>Role & Permissions</button>
 <button
@@ -663,7 +671,8 @@ function Purchases({records,save,update,remove,openEdit}:any){
         ...v,
         name:'',
         article:'',
-        unit:units[0]||'',
+
+                unit:units[0]||'',
         quantity:'',
         price:''
       }));
@@ -1324,4 +1333,7 @@ function groupByName(rows:any[]){const m=new Map<string,any>();rows.forEach(r=>{
 function accountTotals(table:string,name:string,records:any[]){if(table==='customers'){const debit=(records.invoices||[]).filter((r:any)=>same(r.customer,name)).reduce((s:number,r:any)=>s+Number(r.total||0),0);const credit=(records.payments||[]).filter((r:any)=>r.type==='Customer'&&same(r.name,name)).reduce((s:number,r:any)=>s+Number(r.amount||0),0);return {credit,debit,balance:credit-debit};}const credit=(records.purchases||[]).filter((r:any)=>same(r.supplier,name)).reduce((s:number,r:any)=>s+Number(r.total||0),0);const debit=(records.payments||[]).filter((r:any)=>r.type==='Supplier'&&same(r.name,name)).reduce((s:number,r:any)=>s+Number(r.amount||0),0);return {credit,debit,balance:credit-debit};}
 function lastDays(n:number){const out:string[]=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(d.toISOString().slice(0,10));}return out;}
 
+
+
+                                                                                                                                                                                                                                                                                                                                                
 export default App;
