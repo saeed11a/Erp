@@ -1592,7 +1592,7 @@ function SettingsPage(){
     localStorage.getItem('hiker_upper_bags') || '100 / 150 pairs'
   );
 
-  const [rawStockCategories,setRawStockCategories]=useState(
+  const rawStockCategories,setRawStockCategories]=useState(
     localStorage.getItem('hiker_raw_stock_categories') ||
     'Uppers / Chemical / Manual'
   );
@@ -1611,26 +1611,35 @@ function SettingsPage(){
       setSaved('');
     },2000);
   };
+  
+const savePin = () => {
+  const cleanPin = pin.trim();
 
-  const savePin=()=>{
-    if(/^\\d{4,8}$/.test(pin)){
-      localStorage.setItem('hiker_pin',pin);
-      setSaved('pin');
+  if (!/^\d{4,8}$/.test(cleanPin)) {
+    setSaved('pin-error');
 
-      setTimeout(()=>{
-        setSaved('');
-      },2000);
-    }
-  };
+    setTimeout(() => {
+      setSaved('');
+    }, 2500);
 
-  return (
-    <div>
+    return;
+  }
 
-      <PageTitle
-        title="Settings"
-        sub="HIKER+ system preferences and security."
-      />
+  localStorage.setItem('hiker_pin', cleanPin);
+  setPin(cleanPin);
+  setSaved('pin');
 
+  setTimeout(() => {
+    setSaved('');
+  }, 2000);
+};
+
+return (
+  <div>
+    <PageTitle
+      title="Settings"
+      sub="HIKER+ system preferences and security."
+    />
       <div className="panel settings-list">
 
         <div className="list-row">
@@ -1697,11 +1706,16 @@ function SettingsPage(){
           </button>
 
           {saved==='pin'&&(
-            <div className="calc">
-              PIN changed successfully.
-            </div>
-          )}
+  <div className="calc">
+    PIN changed successfully.
+  </div>
+)}
 
+{saved==='pin-error'&&(
+  <div className="pin-error">
+    PIN must contain 4–8 digits.
+  </div>
+)}
         </div>
 
       </div>
