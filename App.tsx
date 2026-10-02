@@ -68,6 +68,7 @@ function App(){
   }, []);
   const [page,setPage]=useState('dashboard');
   const [records,setRecords]=useState<Record<string,RecordItem[]>>({});
+  const [profileOpen,setProfileOpen]=useState(false);
   const [loading,setLoading]=useState(true);
   const [editRecord,setEditRecord]=useState<RecordItem|null>(null);
   const [editTable,setEditTable]=useState('');
@@ -302,7 +303,50 @@ const remove = async (table: string, id: string) => {
       <header className="topbar">
         <button className="mobile-menu" onClick={()=>window.dispatchEvent(new Event('open-sidebar'))}><Menu size={24}/></button>
         <div><div className="eyebrow">HIKER SHOES • FACTORY OPERATIONS</div><h1>{account ? (account.type==='customer'?'Customer Kata':'Supplier Kata') : currentLabel}</h1></div>
-        <div className="top-actions"><button className="icon-btn" onClick={load} title="Refresh"><RefreshCw size={21}/></button><div className="user-chip"><div className="avatar">{String(user.name||user.email||'H').slice(0,1).toUpperCase()}</div><span>{user.name||user.email}</span><button className="icon-btn" title="Sign out" onClick={async()=>{await auth.signOut();setUser(null);setPinUnlocked(false);}}><LogOut size={19}/></button></div></div>
+     <div>
+  <div className="eyebrow">HIKER SHOES • FACTORY OPERATIONS</div>
+  <h1>
+    {account
+      ? (account.type==='customer'?'Customer Kata':'Supplier Kata')
+      : currentLabel}
+  </h1>
+</div>
+
+<div className="top-actions">
+  <button
+    className="icon-btn"
+    onClick={load}
+    title="Refresh"
+  >
+    <RefreshCw size={21}/>
+  </button>
+
+  <div className="profile-menu">
+    <button
+      className="profile-trigger"
+      onClick={() =>
+        window.dispatchEvent(
+          new Event('toggle-profile-menu')
+        )
+      }
+    >
+      <div className="profile-avatar">
+        {String(user.name||user.email||'H')
+          .slice(0,1)
+          .toUpperCase()}
+      </div>
+
+      <span className="profile-name">
+        {user.name||user.email}
+      </span>
+
+      <ChevronRight
+        size={16}
+        className="profile-chevron"
+      />
+    </button>
+  </div>
+</div>
       </header>
       <div className="content">
         {notice&&<div className="notice">{notice}</div>}
