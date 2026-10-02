@@ -122,6 +122,25 @@ function App(){
     if(user)load();
   },[user]);
 
+    const normalizeName = (value: string) =>
+    value.trim().replace(/\s+/g, ' ').toLowerCase();
+
+  const nameExists = (
+    table: string,
+    name: string,
+    excludeId?: string
+  ) => {
+    const target = normalizeName(name);
+
+    return (records[table] || []).some((r: any) => {
+      if (excludeId && String(r.id) === String(excludeId)) {
+        return false;
+      }
+
+      return normalizeName(String(r.name || '')) === target;
+    });
+  };
+
   const save=async(table:string,record:Record<string,any>)=>{
     if(!user)return;
 
@@ -243,8 +262,8 @@ function App(){
             {page==='purchases'&&<Purchases records={records} save={save} remove={remove} openEdit={openEdit}/>}
             {page==='sales'&&<SimpleTable title="Sales" table="sales" rows={filtered('sales')} remove={remove} openEdit={openEdit}/>}
             {page==='invoices'&&<Invoices records={records} save={save} remove={remove} openEdit={openEdit}/>}
-            {page==='customers'&&<Kata title="Customers Kata" table="customers" records={records} save={save} remove={remove} openEdit={openEdit} openAccount={name=>setAccount({type:'customer',name})}/>}
-            {page==='suppliers'&&<Kata title="Suppliers Kata" table="suppliers" records={records} save={save} remove={remove} openEdit={openEdit} openAccount={name=>setAccount({type:'supplier',name})}/>}
+            {page==='customers'&&<Kata title="Customers Kata" table="customers" records={records} save={save} remove={remove} openEdit={openEdit} openAccount={name=>setAccount({type:'customer',name})} nameExists={nameExists} setNotice={setNotice}/>}
+            {page==='suppliers'&&<Kata title="Suppliers Kata" table="suppliers" records={records} save={save} remove={remove} openEdit={openEdit} openAccount={name=>setAccount({type:'supplier',name})} nameExists={nameExists} setNotice={setNotice}/>}
             {page==='payments'&&<Payments records={records} save={save} remove={remove} openEdit={openEdit}/>} 
             {page==='supplierPayments'&&<SupplierPayments records={records} remove={remove} openEdit={openEdit}/>} {page==='roznamcha'&&<Roznamcha records={records} save={save} remove={remove} openEdit={openEdit}/>}
             {page==='kharcha'&&<Kharcha records={records} save={save} remove={remove} openEdit={openEdit}/>}
@@ -675,8 +694,7 @@ function Kharcha({records,save,remove,openEdit}:any){
     </div>
   </div>;
 }
-
-function Kata({title,table,records,save,remove,openEdit,openAccount}:any){
+    function Kata({title,table,records,save,remove,openEdit,openAccount,nameExists,setNotice}:any){
   const [showForm,setShowForm]=useState(false),[showPayment,setShowPayment]=useState(false),rows=records[table]||[],grouped=groupByName(rows);
   const isSupplier=table==='suppliers';
   const supplierNames=[...new Map(rows.map((r:any)=>{const n=String(r.name||'').trim();return [n.toLowerCase(),n] as const;}).filter((x:any)=>x[0])).values()];
@@ -691,9 +709,47 @@ function Kata({title,table,records,save,remove,openEdit,openAccount}:any){
   </div>;
 }
 
-function KataAdder({table,save}:any){
-  const [name,setName]=useState('');return <><Input label="" value={name} onChange={setName}/><button className="primary" onClick={()=>{if(name){save(table,{name,credit:0,debit:0,createdAt:new Date().toISOString()});setName('');}}}><Plus size={18}/> Add</button></>;
-}
+
+    function KataAdder({table,save,records,nameExists,setNotice}:any){
+  const [name,setName]=useState('');
+
+  const addName=async()=>{
+    const cleanName=name.trim().replace(/\s+/g,' ');
+
+    if(!cleanName){
+      setNotice('Please enter a name.');
+      return;
+    }
+
+    if(nameExists(table,cleanName)){
+      setNotice(
+        `${table==='customers'?'Customer':'Supplier'} name already exists.`
+      );
+      return;
+    }
+
+    await save(table,{
+      name:cleanName,
+      credit:0,
+      debit:0,
+      createdAt:new Date().toISOString()
+    });
+
+    setName('');
+  };
+
+  return <>
+    <Input
+      label={table==='customers'?'Customer Name':'Supplier Name'}
+      value={name}
+      onChange={setName}
+    />
+
+    <button className="primary" onClick={addName}>
+      <Plus size={18}/> Add
+    </button>
+  </>;
+    }
 function AccountCard({row,table,records,onOpen,onEdit,onDelete}:any){
   const totals=accountTotals(table,row.name,records);
   const balanceClass=totals.balance>0?'balance-positive':totals.balance<0?'balance-negative':'';
