@@ -1385,9 +1385,162 @@ function KataAdder({table,records,save}:any){
 }
 function AccountCard({row,table,records,onOpen,onEdit,onDelete}:any){
   const totals=accountTotals(table,row.name,records);
-  const balanceClass=totals.balance>0?'balance-positive':totals.balance<0?'balance-negative':'';
-  return <div className="account-card clickable" onClick={onOpen}><div className="account-avatar">{row.name.slice(0,1).toUpperCase()}</div><div className="account-main"><b>{row.name}</b><small className="credit-text">Jamma (Credit) PKR {totals.credit.toLocaleString()}</small><small className="debit-text">Banam (Debit) PKR {totals.debit.toLocaleString()}</small><strong className={balanceClass}>Remaining {totals.balance>0?'+PKR ':totals.balance<0?'-PKR ':'PKR '}{Math.abs(totals.balance).toLocaleString()}</strong></div><div className="record-actions" onClick={e=>e.stopPropagation()}><button className="edit-btn" onClick={onEdit}><Edit3 size={15}/></button><button className="danger-icon" onClick={onDelete}><Trash2 size={16}/></button></div></div>;}
 
+  const balanceClass=
+    totals.balance>0
+      ? 'balance-positive'
+      : totals.balance<0
+        ? 'balance-negative'
+        : '';
+
+  const invs=records.invoices||[];
+  const pays=records.payments||[];
+  const purchases=records.purchases||[];
+
+  const transactions:any[]=[];
+
+  if(table==='customers'){
+    invs
+      .filter((r:any)=>same(r.customer,row.name))
+      .forEach((r:any)=>{
+        transactions.push({
+          sort:r.createdAt||r.date||'',
+          date:r.date,
+          time:r.time,
+          label:'Banam • Invoice',
+          amount:Number(r.total||0)
+        });
+      });
+
+    pays
+      .filter((r:any)=>r.type==='Customer'&&same(r.name,row.name))
+      .forEach((r:any)=>{
+        transactions.push({
+          sort:r.createdAt||r.date||'',
+          date:r.date,
+          time:r.time,
+          label:'Jamma • Payment',
+          amount:Number(r.amount||0)
+        });
+      });
+  }else{
+    purchases
+      .filter((r:any)=>same(r.supplier,row.name))
+      .forEach((r:any)=>{
+        transactions.push({
+          sort:r.createdAt||r.date||'',
+          date:r.date,
+          time:r.time,
+          label:'Jamma • Purchase',
+          amount:Number(r.total||0)
+        });
+      });
+
+    pays
+      .filter((r:any)=>r.type==='Supplier'&&same(r.name,row.name))
+      .forEach((r:any)=>{
+        transactions.push({
+          sort:r.createdAt||r.date||'',
+          date:r.date,
+          time:r.time,
+          label:'Banam • Payment',
+          amount:Number(r.amount||0)
+        });
+      });
+  }
+
+  transactions.sort(
+    (a,b)=>String(b.sort).localeCompare(String(a.sort))
+  );
+
+  const lastTransaction=transactions[0];
+
+  return (
+    <div
+      className="account-card clickable"
+      onClick={onOpen}
+    >
+      <div className="account-avatar">
+        {row.name.slice(0,1).toUpperCase()}
+      </div>
+
+      <div className="account-main">
+
+        <b>{row.name}</b>
+
+        <small className="credit-text">
+          Jamma (Credit) PKR {totals.credit.toLocaleString()}
+        </small>
+
+        <small className="debit-text">
+          Banam (Debit) PKR {totals.debit.toLocaleString()}
+        </small>
+
+        <strong className={balanceClass}>
+          Remaining {
+            totals.balance>0
+              ? '+PKR '
+              : totals.balance<0
+                ? '-PKR '
+                : 'PKR '
+          }
+          {Math.abs(totals.balance).toLocaleString()}
+        </strong>
+
+        {lastTransaction ? (
+          <div className="account-last-transaction">
+            <span className="account-last-label">
+              Last Transaction
+            </span>
+
+            <span className="account-last-title">
+              {lastTransaction.label}
+              {' • '}
+              PKR {lastTransaction.amount.toLocaleString()}
+            </span>
+
+            <span className="account-last-date">
+              {lastTransaction.date}
+              {lastTransaction.time
+                ? ' • '+lastTransaction.time
+                : ''}
+            </span>
+          </div>
+        ) : (
+          <div className="account-last-transaction">
+            <span className="account-last-label">
+              Last Transaction
+            </span>
+
+            <span className="account-last-date">
+              No transactions yet
+            </span>
+          </div>
+        )}
+
+      </div>
+
+      <div
+        className="record-actions"
+        onClick={e=>e.stopPropagation()}
+      >
+        <button
+          className="edit-btn"
+          onClick={onEdit}
+        >
+          <Edit3 size={15}/>
+        </button>
+
+        <button
+          className="danger-icon"
+          onClick={onDelete}
+        >
+          <Trash2 size={16}/>
+        </button>
+      </div>
+    </div>
+  );
+}
 function AccountDetail({type,name,records,onBack}:any){
   const customer=type==='customer', invs=records.invoices||[], pays=records.payments||[], purchases=records.purchases||[];
   const rows:any[]=[];
