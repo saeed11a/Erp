@@ -101,10 +101,31 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
+      - name: Set HIKER Android App Icon
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+
+          source = Path("public/hiker-logo.png")
+          res = Path("android/app/src/main/res")
+
+          if not source.exists():
+              raise SystemExit("public/hiker-logo.png was not found.")
+
+          for folder in ["mipmap-hdpi", "mipmap-mdpi", "mipmap-xhdpi", "mipmap-xxhdpi", "mipmap-xxxhdpi"]:
+              target = res / folder
+              target.mkdir(parents=True, exist_ok=True)
+
+              shutil.copy2(source, target / "ic_launcher.png")
+              shutil.copy2(source, target / "ic_launcher_round.png")
+
+          print("HIKER app icon copied successfully.")
+          PY
+
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleDebug
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
