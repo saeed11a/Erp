@@ -933,3 +933,108 @@ hr {
   justify-content: space-between !important;
   gap: 12px !important;
 }
+
+
+/* =========================================================
+   RECYCLE BIN
+   ========================================================= */
+
+.recycle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E5E2DD;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.recycle-record-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.recycle-record-name {
+  display: block;
+  color: #20232B !important;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.recycle-record-meta {
+  display: block;
+  margin-top: 4px;
+  color: #6B6D73 !important;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.recycle-record-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.recycle-detail {
+  min-width: 0;
+  padding: 8px 10px;
+  background: #F7F7F5;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.recycle-detail-key {
+  display: block;
+  margin-bottom: 2px;
+  color: #73747A !important;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.recycle-detail-value {
+  display: block;
+  color: #20232B !important;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.recycle-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.recycle-actions button {
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .recycle-row {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .recycle-record-details {
+    grid-template-columns: 1fr;
+  }
+
+  .recycle-actions {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .recycle-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}
