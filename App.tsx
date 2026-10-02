@@ -259,7 +259,7 @@ function App(){
             {page==='ready'&&<ReadyShoes records={records} save={save} remove={remove} openEdit={openEdit}/>}
             {page==='articles'&&<Articles records={records}/>}
             {page==='production'&&<Production records={records} save={save} remove={remove} openEdit={openEdit}/>}
-            {page==='purchases'&&<Purchases records={records} save={save} remove={remove} openEdit={openEdit}/>}
+            {page==='purchases'&&<Purchases records={records} save={save} update={update} remove={remove} openEdit={openEdit}/>}
             {page==='sales'&&<SimpleTable title="Sales" table="sales" rows={filtered('sales')} remove={remove} openEdit={openEdit}/>}
             {page==='invoices'&&<Invoices records={records} save={save} remove={remove} openEdit={openEdit}/>}
             {page==='customers'&&<Kata title="Customers Kata" table="customers" records={records} save={save} remove={remove} openEdit={openEdit} openAccount={name=>setAccount({type:'customer',name})} nameExists={nameExists} setNotice={setNotice}/>}
@@ -457,7 +457,7 @@ function Production({records,save,remove,openEdit}:any){
   </div>;
 }
 
-function Purchases({records,save,remove,openEdit}:any){
+function Purchases({records,save,update,remove,openEdit}:any){
   const rawRows=Array.isArray(records?.rawStock)?records.rawStock:[];
   const purchaseRows=Array.isArray(records?.purchases)?records.purchases:[];
   const categories=useMemo(()=>{const s=new Set<string>(['Uppers','Chemical','Other']);rawRows.forEach((r:any)=>{const c=String(r?.category||'').trim();if(c)s.add(c);});return Array.from(s);},[rawRows]);
@@ -501,14 +501,14 @@ function Purchases({records,save,remove,openEdit}:any){
   className="primary full"
   disabled={!valid}
 onClick={async () => {
-  const existing = matching.find(
-    (r: any) =>
-      String(r.name || '').trim().toLowerCase() ===
-        f.name.trim().toLowerCase() &&
-      String(r.article || '').trim().toLowerCase() ===
-        f.article.trim().toLowerCase()
-  );
+const normalizePurchaseValue = (value: any) =>
+  String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
 
+const existing = matching.find(
+  (r: any) =>
+    normalizePurchaseValue(r.name) === normalizePurchaseValue(f.name) &&
+    normalizePurchaseValue(r.article) === normalizePurchaseValue(f.article)
+);
   const now = new Date().toISOString();
 
   // 1. Save the purchase
@@ -560,57 +560,478 @@ onClick={async () => {
       availablePairs: category === 'Uppers' ? pairs : quantity,
       createdAt: now
     });
-  }
 
-  setShowPurchaseForm(false);
-}}
+    function Purchases({records,save,update,remove,openEdit}:any){
+  const rawRows=Array.isArray(records?.rawStock)?records.rawStock:[];
+  const purchaseRows=Array.isArray(records?.purchases)?records.purchases:[];
 
->
-  <Plus size={18} /> Save Purchase
-</button>   
-      </div>
-      </div> }
-    </div>
-    <SimpleTable title="Purchase Register" table="purchases" rows={purchaseRows} remove={remove} openEdit={openEdit}/>
-  </div>;
-}
-function LegacyPurchases({records,save,remove,openEdit}:any){
-  const rawRows=(records.rawStock||[]) as any[];
   const categories=useMemo(()=>{
-    const values=new Set<string>(['Uppers','Chemical','Other']);
-    rawRows.forEach(r=>{if(String(r.category||'').trim())values.add(String(r.category).trim());});
-    return [...values];
+    const s=new Set<string>(['Uppers','Chemical','Other']);
+
+    rawRows.forEach((r:any)=>{
+      const c=String(r?.category||'').trim();
+      if(c)s.add(c);
+    });
+
+    return Array.from(s);
   },[rawRows]);
+
+  // Purchase form is CLOSED by default.
+  const [showPurchaseForm,setShowPurchaseForm]=useState(false);
+
   const [category,setCategory]=useState('Uppers');
   const [selectedId,setSelectedId]=useState('');
-  const [isNew,setIsNew]=useState(false);
-  const [f,setF]=useState({supplier:'',name:'',article:'',unit:'100 pairs/bag',quantity:'',price:''});
-  const matching=useMemo(()=>rawRows.filter(r=>String(r.category||'').trim().toLowerCase()===category.trim().toLowerCase()),[rawRows,category]);
+  const [isNew,setIsNew]=useState(true);
+
+  const [f,setF]=useState({
+    supplier:'',
+    name:'',
+    article:'',
+    unit:'100 pairs/bag',
+    quantity:'',
+    price:''
+  });
+
+  const matching=useMemo(
+    ()=>rawRows.filter(
+      (r:any)=>
+        String(r?.category||'').trim().toLowerCase()===
+        category.toLowerCase()
+    ),
+    [rawRows,category]
+  );
+
   const units=useMemo(()=>{
-    const values:string[]=[];
-    matching.forEach(r=>{if(r.unit&&!values.includes(String(r.unit)))values.push(String(r.unit));});
+    const u:string[]=[];
+
+    matching.forEach((r:any)=>{
+      const x=String(r?.unit||'');
+      if(x&&!u.includes(x))u.push(x);
+    });
+
     if(category==='Uppers'){
-      ['100 pairs/bag','150 pairs/bag'].forEach(x=>{if(!values.includes(x))values.push(x);});
-    }else if(!values.length){
-      ['Drums','KG','Pieces','Cartons'].forEach(x=>values.push(x));
+      ['100 pairs/bag','150 pairs/bag'].forEach(x=>{
+        if(!u.includes(x))u.push(x);
+      });
+    }else if(!u.length){
+      u.push('Drums','KG','Pieces','Cartons');
     }
-    return values;
+
+    return u;
   },[matching,category]);
-  const applyCategory=(next:string)=>{
-    setCategory(next);
-    const rows=rawRows.filter(r=>String(r.category||'').trim().toLowerCase()===next.trim().toLowerCase());
+
+  const normalizePurchaseValue=(value:any)=>
+    String(value||'')
+      .trim()
+      .replace(/\s+/g,' ')
+      .toLowerCase();
+
+  const resetPurchaseForm=()=>{
+    setSelectedId('');
+    setIsNew(true);
+
+    setF({
+      supplier:'',
+      name:'',
+      article:'',
+      unit:category==='Uppers'?'100 pairs/bag':'Drums',
+      quantity:'',
+      price:''
+    });
+  };
+
+  const chooseCategory=(c:string)=>{
+    setCategory(c);
+
+    const rows=rawRows.filter(
+      (r:any)=>
+        String(r?.category||'').trim().toLowerCase()===
+        c.toLowerCase()
+    );
+
     const first=rows[0];
+
     if(first){
+      setSelectedId(String(first.id));
       setIsNew(false);
-      setSelectedId(first.id);
-      setF(v=>({...v,name:first.name||'',article:first.article||'',unit:first.unit||units[0]||'',quantity:'',price:''}));
+
+      setF(v=>({
+        ...v,
+        name:String(first.name||''),
+        article:String(first.article||''),
+        unit:String(first.unit||(
+          c==='Uppers'?'100 pairs/bag':'Drums'
+        )),
+        quantity:'',
+        price:''
+      }));
     }else{
-      setIsNew(true);
       setSelectedId('');
-      setF(v=>({...v,name:'',article:'',unit:next==='Uppers'?'100 pairs/bag':'Drums',quantity:'',price:''}));
+      setIsNew(true);
+
+      setF(v=>({
+        ...v,
+        name:'',
+        article:'',
+        unit:c==='Uppers'?'100 pairs/bag':'Drums',
+        quantity:'',
+        price:''
+      }));
     }
   };
-  const applyItem=(id:string)=>{
+
+  const chooseItem=(id:string)=>{
+    if(id==='__new__'){
+      setSelectedId('');
+      setIsNew(true);
+
+      setF(v=>({
+        ...v,
+        name:'',
+        article:'',
+        unit:units[0]||'',
+        quantity:'',
+        price:''
+      }));
+
+      return;
+    }
+
+    const row=matching.find(
+      (r:any)=>String(r.id)===id
+    );
+
+    if(!row)return;
+
+    setSelectedId(id);
+    setIsNew(false);
+
+    setF(v=>({
+      ...v,
+      name:String(row.name||''),
+      article:String(row.article||''),
+      unit:String(row.unit||units[0]||''),
+      quantity:'',
+      price:''
+    }));
+  };
+
+  const mult=bagPairs[f.unit]||cartonPairs[f.unit]||1;
+  const quantity=Number(f.quantity)||0;
+  const pairs=quantity*mult;
+  const price=Number(f.price)||0;
+
+  const total=
+    f.unit.includes('bag')
+      ? pairs*price
+      : quantity*price;
+
+  const valid=Boolean(
+    f.supplier.trim() &&
+    f.name.trim() &&
+    quantity>0 &&
+    f.price!=='' &&
+    price>=0
+  );
+
+  const savePurchase=async()=>{
+    if(!valid)return;
+
+    try{
+      const now=new Date().toISOString();
+
+      const cleanSupplier=f.supplier.trim().replace(/\s+/g,' ');
+      const cleanName=f.name.trim().replace(/\s+/g,' ');
+      const cleanArticle=f.article.trim().replace(/\s+/g,' ');
+
+      /*
+       * 1. Save the purchase transaction.
+       * This remains an independent Purchase record.
+       */
+      await save('purchases',{
+        supplier:cleanSupplier,
+        name:cleanName,
+        article:cleanArticle,
+        unit:f.unit,
+        quantity,
+        price,
+        category,
+        pairs,
+        total,
+        date:now.slice(0,10),
+        time:new Date().toLocaleTimeString(),
+        createdAt:now
+      });
+
+      /*
+       * 2. Find the matching Raw Stock item.
+       *
+       * Name + Article are compared case-insensitively
+       * and repeated spaces are ignored.
+       */
+      const existing=matching.find(
+        (r:any)=>
+          normalizePurchaseValue(r.name)===
+            normalizePurchaseValue(cleanName) &&
+          normalizePurchaseValue(r.article)===
+            normalizePurchaseValue(cleanArticle)
+      );
+
+      /*
+       * 3. Add the purchase quantity to existing Raw Stock.
+       */
+      if(existing){
+        const oldQuantity=Number(existing.quantity)||0;
+
+        const oldPairs=Number(
+          existing.availablePairs??
+          existing.totalPairs??
+          0
+        );
+
+        const addedPairs=
+          category==='Uppers'
+            ? pairs
+            : quantity;
+
+        const newQuantity=
+          oldQuantity+quantity;
+
+        const newPairs=
+          oldPairs+addedPairs;
+
+        await update(
+          'rawStock',
+          String(existing.id),
+          {
+            ...existing,
+
+            name:cleanName,
+            article:
+              category==='Uppers'
+                ? cleanArticle
+                : '',
+
+            unit:f.unit,
+            category,
+
+            quantity:newQuantity,
+
+            totalPairs:newPairs,
+            availablePairs:newPairs,
+
+            price,
+
+            updatedAt:now
+          }
+        );
+      }
+
+      /*
+       * 4. If the item does not exist in Raw Stock,
+       * create it automatically.
+       */
+      else{
+        const stockPairs=
+          category==='Uppers'
+            ? pairs
+            : quantity;
+
+        await save('rawStock',{
+          name:cleanName,
+
+          article:
+            category==='Uppers'
+              ? cleanArticle
+              : '',
+
+          unit:f.unit,
+          quantity,
+          price,
+          minStock:'0',
+          category,
+
+          totalPairs:stockPairs,
+          availablePairs:stockPairs,
+
+          createdAt:now,
+          updatedAt:now
+        });
+      }
+
+      /*
+       * Articles are automatically generated from
+       * Raw Stock, so no separate Articles record
+       * is required here.
+       */
+
+      setShowPurchaseForm(false);
+      resetPurchaseForm();
+
+    }catch(error){
+      console.error(error);
+    }
+  };
+
+  return (
+    <div>
+      <PageTitle
+        title="Purchase"
+        sub="Create purchases from Raw Stock. Choose an existing item to auto-fill details, or create a new item."
+      />
+
+      <div className="panel">
+        <div className="panel-head">
+          <div>
+            <b>Purchase</b>
+            <small>{purchaseRows.length} purchase records</small>
+          </div>
+
+          <button
+            className="primary"
+            onClick={()=>{
+              setShowPurchaseForm(true);
+              resetPurchaseForm();
+            }}
+          >
+            <Plus size={18}/>
+            New Purchase
+          </button>
+        </div>
+
+        {showPurchaseForm&&(
+          <div className="form-panel">
+            <div className="form-grid">
+
+              <Input
+                label="Supplier"
+                value={f.supplier}
+                onChange={(v:string)=>
+                  setF({...f,supplier:v})
+                }
+              />
+
+              <Select
+                label="Raw Stock Category"
+                value={category}
+                options={categories}
+                onChange={chooseCategory}
+              />
+
+              <Select
+                label="Raw Stock Item"
+                value={
+                  isNew
+                    ? '__new__'
+                    : selectedId||'__new__'
+                }
+                options={[
+                  ...matching.map((r:any)=>({
+                    value:String(r.id),
+                    label:
+                      String(r.name||'Unnamed')+
+                      (
+                        r.article
+                          ? ' • '+String(r.article)
+                          : ''
+                      )
+                  })),
+                  {
+                    value:'__new__',
+                    label:'＋ New Item / Not in Raw Stock'
+                  }
+                ].map((o:any)=>o.value)}
+                onChange={chooseItem}
+              />
+
+              <Input
+                label="Name / Material"
+                value={f.name}
+                onChange={(v:string)=>
+                  setF({...f,name:v})
+                }
+              />
+
+              <Input
+                label="Article"
+                value={f.article}
+                onChange={(v:string)=>
+                  setF({...f,article:v})
+                }
+              />
+
+              <Select
+                label="Unit"
+                value={f.unit}
+                options={units}
+                onChange={(v:string)=>
+                  setF({...f,unit:v})
+                }
+              />
+
+              <Input
+                label="Quantity"
+                type="number"
+                value={f.quantity}
+                onChange={(v:string)=>
+                  setF({...f,quantity:v})
+                }
+              />
+
+              <Input
+                label={
+                  f.unit.includes('bag')
+                    ? 'Price per pair'
+                    : 'Price'
+                }
+                type="number"
+                value={f.price}
+                onChange={(v:string)=>
+                  setF({...f,price:v})
+                }
+              />
+
+              <div className="calc">
+                Category: <b>{category}</b>
+                {' • '}
+                {isNew
+                  ? 'New Raw Stock item'
+                  : 'Existing Raw Stock item'}
+                {' • '}
+                Converted pairs:
+                {' '}
+                <b>{pairs.toLocaleString()}</b>
+                {' • '}
+                Total:
+                {' '}
+                <b>PKR {total.toLocaleString()}</b>
+              </div>
+
+              <button
+                className="primary full"
+                disabled={!valid}
+                onClick={savePurchase}
+              >
+                <Plus size={18}/>
+                Save Purchase
+              </button>
+
+            </div>
+          </div>
+        )}
+      </div>
+
+      <SimpleTable
+        title="Purchase Register"
+        table="purchases"
+        rows={purchaseRows}
+        remove={remove}
+        openEdit={openEdit}
+      />
+    </div>
+  );
+}
+
 
 
 function Invoices({records,save,remove,openEdit}:any){
