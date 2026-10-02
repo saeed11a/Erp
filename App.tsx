@@ -81,9 +81,21 @@ function App(){
   setLoading(true);
 
   try {
+    const {
+      data: { user: supabaseUser },
+      error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!supabaseUser) {
+      throw new Error('No signed-in user.');
+    }
+
     const { data, error } = await supabase
       .from('erp_records')
-      .select('id, table_name, data');
+      .select('id, table_name, data')
+      .eq('user_id', supabaseUser.id);
 
     if (error) throw error;
 
@@ -102,7 +114,7 @@ function App(){
 
     setRecords(grouped);
   } catch (e) {
-    console.error(e);
+    console.error('LOAD ERROR:', e);
     setNotice('Could not load ERP data.');
   } finally {
     setLoading(false);
@@ -150,12 +162,27 @@ function App(){
       subscription.unsubscribe();
     };
   }, []);
-  useEffect(()=>{if(user)load();},[user]);
+  useEffect(() => {
+  if (user) load();
+}, [user]);
+
 const save = async (table: string, record: Record<string, any>) => {
   try {
+    const {
+      data: { user: supabaseUser },
+      error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!supabaseUser) {
+      throw new Error('No signed-in user.');
+    }
+
     const { error } = await supabase
       .from('erp_records')
       .insert({
+        user_id: supabaseUser.id,
         table_name: table,
         data: record
       });
@@ -165,18 +192,35 @@ const save = async (table: string, record: Record<string, any>) => {
     await load();
     setNotice('Saved successfully.');
   } catch (e) {
-    console.error(e);
-    setNotice('Save failed. Please check the entered data.');
+    console.error('SAVE ERROR:', e);
+    setNotice('Save failed. Please try again.');
   }
 };
-  const update = async (table: string, id: string, record: Record<string, any>) => {
+
+  const update = async (
+  table: string,
+  id: string,
+  record: Record<string, any>
+) => {
   try {
+    const {
+      data: { user: supabaseUser },
+      error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!supabaseUser) {
+      throw new Error('No signed-in user.');
+    }
+
     const { error } = await supabase
       .from('erp_records')
       .update({
         data: record
       })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', supabaseUser.id);
 
     if (error) throw error;
 
@@ -184,18 +228,31 @@ const save = async (table: string, record: Record<string, any>) => {
     setEditRecord(null);
     setNotice('Updated successfully.');
   } catch (e) {
-    console.error(e);
+    console.error('UPDATE ERROR:', e);
     setNotice('Update failed.');
   }
 };
-  const remove = async (table: string, id: string) => {
+
+const remove = async (table: string, id: string) => {
   if (!confirm('Move this record to Recycle Bin?')) return;
 
   try {
+    const {
+      data: { user: supabaseUser },
+      error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!supabaseUser) {
+      throw new Error('No signed-in user.');
+    }
+
     const { data: record, error: fetchError } = await supabase
       .from('erp_records')
       .select('table_name, data')
       .eq('id', id)
+      .eq('user_id', supabaseUser.id)
       .single();
 
     if (fetchError) throw fetchError;
@@ -203,6 +260,7 @@ const save = async (table: string, record: Record<string, any>) => {
     const { error: recycleError } = await supabase
       .from('erp_records')
       .insert({
+        user_id: supabaseUser.id,
         table_name: 'recycle',
         data: {
           originalTable: table,
@@ -217,14 +275,15 @@ const save = async (table: string, record: Record<string, any>) => {
     const { error: deleteError } = await supabase
       .from('erp_records')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', supabaseUser.id);
 
     if (deleteError) throw deleteError;
 
     await load();
     setNotice('Moved to Recycle Bin.');
   } catch (e: any) {
-    console.error(e);
+    console.error('REMOVE ERROR:', e);
     setNotice('Delete failed: ' + (e?.message || 'Unknown error.'));
   }
 };
