@@ -686,3 +686,11 @@ hr {
   background: var(--orange-light);
   color: var(--text-primary);
 }
+
+.logo-image {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 12px;
+}
