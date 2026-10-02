@@ -709,7 +709,41 @@ function Production({records,save,remove,openEdit}:any){
       <div className="stock-preview"><span>Available Upper bags</span><b>{chosen?.bags||0}</b><span>Available Upper pairs</span><b>{Number(chosen?.pairs||0).toLocaleString()}</b><span>Max producible pairs</span><b>{maxProduce.toLocaleString()}</b></div>
       <Select label="Ready carton" value={cartonType} options={Object.keys(cartonPairs)} onChange={setCartonType}/><Input label="Production cartons" type="number" value={cartons} onChange={setCartons}/>
       <div className="calc">Ready to produce for <b>{article||"—"}</b>: <b>{maxProduce.toLocaleString()} pairs</b> • Output: <b>{output.toLocaleString()} pairs</b></div>
-      <button className="primary full" disabled={!chosen||output<=0||output>maxProduce} onClick={async()=>{await save('production',{article,cartonType,cartons:Number(cartons),outputPairs:output,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()});setShowForm(false);}}><Factory size={18}/> Complete Production & Add Ready Shoes</button>
+      <button
+  className="primary full"
+  disabled={!chosen || output <= 0 || output > maxProduce}
+  onClick={async () => {
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+
+    await save('production', {
+      article,
+      cartonType,
+      cartons: Number(cartons),
+      outputPairs: output,
+      date,
+      createdAt: now.toISOString()
+    });
+
+    await save('readyShoes', {
+      name: article,
+      article,
+      cartonType,
+      cartons: Number(cartons),
+      totalPairs: output,
+      availablePairs: output,
+      date,
+      createdAt: now.toISOString(),
+      productionSource: true
+    });
+
+    setShowForm(false);
+  }}
+>
+  <Factory size={18}/>
+  Complete Production & Add Ready Shoes
+</button>
+      
     </div></div>}
     <div className="table-wrap"><table><thead><tr><th>Article</th><th>Production cartons</th><th>Output pairs</th><th>Date</th><th>Actions</th></tr></thead><tbody>
       {rows.map((r:any)=><tr key={r.id}><td><b>{r.article}</b></td><td>{r.cartons} × {r.cartonType}</td><td>{Number(r.outputPairs||0).toLocaleString()}</td><td>{r.date}</td><td><RecordActions onEdit={()=>openEdit('production',r)} onDelete={()=>remove('production',r.id)}/></td></tr>)}
