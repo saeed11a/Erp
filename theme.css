@@ -68,8 +68,10 @@ body {
 .sidebar a:hover,
 .sidebar button:hover,
 .sidebar .nav-item:hover {
-  background: rgba(255,255,255,.06) !important;
+  background: #222838 !important;
   color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.28) !important;
+  border-color: transparent !important;
 }
 
 .sidebar .active,
