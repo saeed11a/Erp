@@ -896,3 +896,40 @@ hr {
   background: #F7EBDD;
   color: #20232B;
 }
+/* Profile edit modal - mobile safe */
+.profile-edit-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  z-index: 99999 !important;
+  box-sizing: border-box !important;
+}
+
+.profile-edit-card {
+  position: relative !important;
+  width: min(420px, calc(100vw - 40px)) !important;
+  max-width: 420px !important;
+  max-height: calc(100vh - 40px) !important;
+  overflow-y: auto !important;
+  margin: 0 !important;
+  background: #FFFFFF !important;
+  border-radius: 18px !important;
+  padding: 22px !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25) !important;
+  color: #20232B !important;
+}
+
+.profile-edit-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
