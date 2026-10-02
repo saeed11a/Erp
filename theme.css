@@ -9,145 +9,66 @@
   --text-secondary: #73747A;
 
   --border: #E5E2DD;
+  --border-strong: #C9C6C0;
 
   --orange: #C8752D;
   --orange-hover: #B86624;
   --orange-light: #F7EBDD;
+
+  --table-head: #F3F1ED;
+  --table-hover: #FAF9F7;
+
+  --danger: #B94A48;
+  --danger-light: #F8E8E7;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
+  margin: 0;
   background: var(--page-bg) !important;
   color: var(--text-primary) !important;
 }
 
-.app-shell {
-  background: var(--page-bg) !important;
-}
-
-.sidebar {
-  background: var(--sidebar-bg) !important;
-  border-right: none !important;
-}
-/* Global page styling */
+.app-shell,
 .main-content,
+.main,
 .content,
 .page-content {
   background: var(--page-bg) !important;
   color: var(--text-primary) !important;
 }
 
-/* Cards */
-.card,
-.stat-card,
-.metric-card,
-.panel,
-.section-card,
-.module-card {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(32, 35, 43, 0.04) !important;
-  color: var(--text-primary) !important;
-}
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
-/* Main text */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--text-primary) !important;
-}
-
-/* Secondary text */
-p,
-label,
-small,
-.muted,
-.secondary-text {
-  color: var(--text-secondary);
-}
-
-/* Borders */
-table,
-th,
-td {
-  border-color: var(--border) !important;
-}
-/* Buttons */
-button,
-.btn,
-.primary {
-  border-radius: 8px !important;
-}
-
-button.primary,
-.primary {
-  background: var(--orange) !important;
-  color: #FFFFFF !important;
-  border: 1px solid var(--orange) !important;
-}
-
-button.primary:hover,
-.primary:hover {
-  background: var(--orange-hover) !important;
-}
-
-button.secondary,
-.secondary,
-.btn-secondary {
-  background: #FFFFFF !important;
-  color: var(--text-primary) !important;
-  border: 1px solid var(--border) !important;
-}
-
-button.secondary:hover,
-.secondary:hover,
-.btn-secondary:hover {
-  background: #F7F6F3 !important;
-}
-
-/* Forms and inputs */
-input,
-select,
-textarea {
-  background: #FFFFFF !important;
-  color: var(--text-primary) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-secondary) !important;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--orange) !important;
-  outline: none !important;
-  box-shadow: 0 0 0 2px var(--orange-light) !important;
-}
-/* Sidebar navigation */
 .sidebar {
   background: var(--sidebar-bg) !important;
   color: #FFFFFF !important;
+  border-right: none !important;
 }
 
 .sidebar a,
 .sidebar button,
-.nav-item {
-  color: #D7D8DE !important;
+.sidebar .nav-item {
   background: transparent !important;
+  color: #D7D8DE !important;
   border-radius: 8px !important;
 }
 
 .sidebar a:hover,
 .sidebar button:hover,
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+.sidebar .nav-item:hover {
+  background: rgba(255,255,255,.06) !important;
   color: #FFFFFF !important;
 }
 
@@ -162,40 +83,434 @@ textarea:focus {
   color: currentColor !important;
 }
 
-/* Tables */
-table {
-  width: 100%;
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar,
+.header,
+.app-header {
   background: #FFFFFF !important;
-  border-collapse: separate;
-  border-spacing: 0;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+.topbar button,
+.header button,
+.app-header button {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+.topbar button:hover,
+.header button:hover,
+.app-header button:hover {
+  background: var(--page-bg) !important;
+}
+
+/* =========================================================
+   PAGE HEADINGS
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary) !important;
 }
 
-thead {
-  background: #F3F1ED !important;
+p,
+small,
+.muted,
+.secondary-text {
+  color: var(--text-secondary);
 }
 
-th {
+.page-head h2,
+.topbar h1 {
+  color: var(--text-primary) !important;
+}
+
+.page-head p,
+.eyebrow {
   color: var(--text-secondary) !important;
+}
+
+/* =========================================================
+   CARDS / PANELS / METRICS
+   ========================================================= */
+
+.card,
+.stat-card,
+.metric-card,
+.metric,
+.panel,
+.section-card,
+.module-card,
+.report-card,
+.account-card,
+.stock-preview {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(32,35,43,.04) !important;
+}
+
+.metric strong,
+.report-card strong,
+.account-card b,
+td b {
+  color: var(--text-primary) !important;
+}
+
+.metric span,
+.report-card small,
+.account-card small,
+.panel small {
+  color: var(--text-secondary) !important;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+form,
+.form,
+.form-card,
+.form-container,
+.form-panel,
+.form-section,
+.form-group,
+.field-group,
+.purchase-form,
+.purchase-panel,
+.drawer,
+.drawer-content {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+.field,
+.form-field {
+  color: var(--text-primary) !important;
+}
+
+form label,
+.form label,
+.field label,
+.field span {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+input,
+select,
+textarea,
+.field input,
+.field select,
+.field textarea,
+.form-panel input,
+.form-panel select,
+.form-panel textarea,
+.purchase-form input,
+.purchase-form select,
+.purchase-form textarea,
+.purchase-panel input,
+.purchase-panel select,
+.purchase-panel textarea,
+.modal input,
+.modal select,
+.modal textarea,
+.dialog input,
+.dialog select,
+.dialog textarea {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--orange) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--orange-light) !important;
+}
+
+/* =========================================================
+   CALCULATIONS / TOTALS
+   ========================================================= */
+
+.calc,
+.calculation,
+.calculation-box,
+.summary,
+.summary-box,
+.total-box,
+.form-summary,
+.stock-preview {
+  background: var(--orange-light) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.calc b,
+.calculation b,
+.calculation-box b,
+.summary b,
+.summary-box b,
+.total-box b,
+.form-summary b,
+.stock-preview b {
+  color: var(--orange) !important;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+button,
+.btn,
+.primary,
+.secondary {
+  border-radius: 8px !important;
+}
+
+button.primary,
+.primary,
+.btn-primary {
+  background: var(--orange) !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--orange) !important;
+}
+
+button.primary:hover,
+.primary:hover,
+.btn-primary:hover {
+  background: var(--orange-hover) !important;
+}
+
+button.secondary,
+.secondary,
+.btn-secondary {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+button.secondary:hover,
+.secondary:hover,
+.btn-secondary:hover {
+  background: var(--page-bg) !important;
+}
+
+/* =========================================================
+   ICON / SMALL BUTTONS
+   ========================================================= */
+
+.icon-btn,
+.mobile-menu,
+.edit-btn,
+.back-btn {
+  background: #FFFFFF !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.icon-btn:hover,
+.mobile-menu:hover,
+.edit-btn:hover,
+.back-btn:hover {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.table-wrap,
+.table-container,
+.table-card,
+.table-panel {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+table,
+.table-wrap table,
+.table-container table,
+.table-card table,
+.table-panel table {
+  width: 100%;
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead,
+.table-wrap thead,
+.table-container thead,
+.table-card thead,
+.table-panel thead {
+  background: var(--table-head) !important;
+}
+
+th,
+.table-wrap th,
+.table-container th,
+.table-card th,
+.table-panel th {
+  background: var(--table-head) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border) !important;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--border) !important;
+  letter-spacing: .04em;
 }
 
-td {
+td,
+.table-wrap td,
+.table-container td,
+.table-card td,
+.table-panel td {
+  background: #FFFFFF !important;
   color: var(--text-primary) !important;
   border-bottom: 1px solid var(--border) !important;
 }
 
-tr:hover td {
-  background: #FAF9F7 !important;
+tbody tr:hover td,
+.table-wrap tr:hover td {
+  background: var(--table-hover) !important;
 }
-/* Accent colors */
-.text-primary,
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+.tabs {
+  background: transparent !important;
+}
+
+.tabs button {
+  background: #FFFFFF !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.tabs button:hover {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.tabs button.selected {
+  background: var(--orange-light) !important;
+  color: var(--orange) !important;
+  border-color: var(--orange) !important;
+}
+
+/* =========================================================
+   MODALS / DIALOGS
+   ========================================================= */
+
+.modal-backdrop,
+.overlay,
+.dialog-backdrop {
+  background: rgba(23,27,39,.45) !important;
+}
+
+.modal,
+.modal-content,
+.dialog,
+.dialog-content {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 20px 60px rgba(32,35,43,.12) !important;
+}
+
+.modal-head b,
+.modal h1,
+.modal h2,
+.modal h3,
+.dialog h1,
+.dialog h2,
+.dialog h3 {
+  color: var(--text-primary) !important;
+}
+
+.modal-head small {
+  color: var(--text-secondary) !important;
+}
+
+.modal-actions {
+  background: #FFFFFF !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.modal .primary,
+.dialog .primary {
+  background: var(--orange) !important;
+  color: #FFFFFF !important;
+}
+
+.modal .secondary,
+.dialog .secondary {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* =========================================================
+   NOTICES
+   ========================================================= */
+
+.notice {
+  background: var(--orange-light) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+   ========================================================= */
+
+.empty,
+.empty-state,
+.loading {
+  background: #FFFFFF !important;
+  color: var(--text-secondary) !important;
+}
+
+/* =========================================================
+   ACCENTS
+   ========================================================= */
+
+.text-accent,
 .accent,
-.text-accent {
+.text-primary {
   color: var(--orange) !important;
 }
 
@@ -205,37 +520,127 @@ tr:hover td {
   color: var(--orange) !important;
 }
 
-/* Important values */
 .amount,
 .total,
 .stat-value {
   color: var(--text-primary) !important;
 }
 
-/* Links */
+/* =========================================================
+   LINKS
+   ========================================================= */
+
 a {
   color: var(--orange);
 }
 
 a:hover {
   color: var(--orange-hover);
-  }
-/* Mobile */
+}
+
+/* =========================================================
+   ACTION GRID
+   ========================================================= */
+
+.action-grid button {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.action-grid button:hover {
+  background: var(--orange-light) !important;
+  color: var(--orange) !important;
+  border-color: var(--orange) !important;
+}
+
+/* =========================================================
+   RECORD ACTIONS
+   ========================================================= */
+
+.record-actions .edit-btn {
+  background: #FFFFFF !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.record-actions .edit-btn:hover {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.record-actions .delete-btn {
+  color: var(--danger) !important;
+}
+
+.record-actions .delete-btn:hover {
+  background: var(--danger-light) !important;
+}
+
+/* =========================================================
+   LOGIN / PIN GATE
+   ========================================================= */
+
+.pin-gate {
+  background: var(--page-bg) !important;
+}
+
+.pin-card {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 20px 60px rgba(32,35,43,.12) !important;
+}
+
+.pin-card h1 {
+  color: var(--text-primary) !important;
+}
+
+.pin-card p,
+.pin-card small,
+.pin-default {
+  color: var(--text-secondary) !important;
+}
+
+.pin-default {
+  background: var(--page-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.pin-card input {
+  background: #FFFFFF !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong) !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 768px) {
-  .app-shell {
+
+  .app-shell,
+  .main-content,
+  .main,
+  .content,
+  .page-content {
     background: var(--page-bg) !important;
   }
 
   .sidebar {
     background: var(--sidebar-bg) !important;
+    box-shadow: 20px 0 60px rgba(0,0,0,.25) !important;
   }
 
   .card,
   .stat-card,
   .metric-card,
+  .metric,
   .panel,
   .section-card,
-  .module-card {
+  .module-card,
+  .report-card,
+  .account-card {
     border-radius: 10px !important;
   }
 
@@ -249,216 +654,35 @@ a:hover {
   textarea {
     min-height: 42px;
   }
-}
-/* Light form backgrounds */
-form,
-.form,
-.form-card,
-.form-container,
-.form-panel,
-.modal,
-.modal-content,
-.dialog,
-.drawer,
-.purchase-form,
-.purchase-panel {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border-color: #E5E2DD !important;
-  box-shadow: 0 2px 8px rgba(32, 35, 43, 0.04) !important;
-}
 
-/* Form sections */
-.form-section,
-.form-group,
-.field-group {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-}
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
 
-/* Form labels */
-form label,
-.form label {
-  color: #20232B !important;
+  table {
+    min-width: 650px;
+  }
 }
 
 /* =========================================================
-   HIKER LIGHT THEME - FORMS, CALCULATIONS, TABLES & MODALS
+   ACCESSIBILITY / CONSISTENCY
    ========================================================= */
 
-.form-panel,
-.form-card,
-.form-container,
-.form-section,
-.form-group,
-.field-group,
-.purchase-form,
-.purchase-panel,
-.modal,
-.modal-content,
-.dialog,
-.dialog-content,
-.drawer,
-.drawer-content {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border-color: #E5E2DD !important;
+button:disabled,
+.primary:disabled {
+  background: #D8D5D0 !important;
+  color: var(--text-secondary) !important;
+  border-color: #D8D5D0 !important;
+  cursor: not-allowed !important;
 }
 
-/* Calculation / summary areas */
-.calc,
-.calculation,
-.calculation-box,
-.summary,
-.summary-box,
-.total-box,
-.form-summary {
-  background: #F7EBDD !important;
-  color: #20232B !important;
-  border: 1px solid #E5E2DD !important;
-  border-radius: 8px !important;
+hr {
+  border: 0 !important;
+  border-top: 1px solid var(--border) !important;
 }
 
-.calc b,
-.calculation b,
-.calculation-box b,
-.summary b,
-.summary-box b,
-.total-box b,
-.form-summary b {
-  color: #C8752D !important;
-}
-
-/* All form controls */
-.form-panel input,
-.form-panel select,
-.form-panel textarea,
-.form-card input,
-.form-card select,
-.form-card textarea,
-.modal input,
-.modal select,
-.modal textarea,
-.dialog input,
-.dialog select,
-.dialog textarea {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border: 1px solid #E5E2DD !important;
-}
-
-/* Tables and their containers */
-.table-wrap,
-.table-container,
-.table-card,
-.table-panel {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border-color: #E5E2DD !important;
-}
-
-.table-wrap table,
-.table-container table,
-.table-card table,
-.table-panel table {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-}
-
-.table-wrap thead,
-.table-container thead,
-.table-card thead,
-.table-panel thead {
-  background: #F3F1ED !important;
-}
-
-.table-wrap th,
-.table-container th,
-.table-card th,
-.table-panel th {
-  background: #F3F1ED !important;
-  color: #73747A !important;
-  border-color: #E5E2DD !important;
-}
-
-.table-wrap td,
-.table-container td,
-.table-card td,
-.table-panel td {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border-color: #E5E2DD !important;
-}
-
-.table-wrap tr:hover td,
-.table-container tr:hover td,
-.table-card tr:hover td,
-.table-panel tr:hover td {
-  background: #FAF9F7 !important;
-}
-
-/* Modal backdrop */
-.modal-backdrop,
-.overlay,
-.dialog-backdrop {
-  background: rgba(23, 27, 39, 0.45) !important;
-}
-
-/* Modal action buttons */
-.modal .primary,
-.dialog .primary,
-.modal button.primary,
-.dialog button.primary {
-  background: #C8752D !important;
-  color: #FFFFFF !important;
-  border-color: #C8752D !important;
-}
-
-.modal .secondary,
-.dialog .secondary {
-  background: #FFFFFF !important;
-  color: #20232B !important;
-  border: 1px solid #E5E2DD !important;
-}
-
-/* Close buttons */
-.modal .icon-btn,
-.dialog .icon-btn {
-  color: #73747A !important;
-  background: transparent !important;
-}
-
-.modal .icon-btn:hover,
-.dialog .icon-btn:hover {
-  background: #F7F6F3 !important;
-  color: #20232B !important;
-}
-
-/* Empty table / empty state */
-.empty,
-.empty-state {
-  background: #FFFFFF !important;
-  color: #73747A !important;
-}
-
-/* Tabs */
-.tabs {
-  background: transparent !important;
-}
-
-.tabs button {
-  background: #FFFFFF !important;
-  color: #73747A !important;
-  border: 1px solid #E5E2DD !important;
-}
-
-.tabs button:hover {
-  background: #F7F6F3 !important;
-  color: #20232B !important;
-}
-
-.tabs button.selected {
-  background: #C8752D !important;
-  color: #FFFFFF !important;
-  border-color: #C8752D !important;
+::selection {
+  background: var(--orange-light);
+  color: var(--text-primary);
 }
