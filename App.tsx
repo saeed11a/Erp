@@ -540,10 +540,75 @@ try{
 }
 
 function PinGate({onUnlock}:any){
-  const [pin,setPin]=useState(''),[error,setError]=useState('');
-  const submit=()=>{const saved=localStorage.getItem('hiker_pin')||'1234';if(pin===saved){setError('');onUnlock();}else{setError('Incorrect PIN.');setPin('');}};
-  return  <div className="pin-gate"><div className="pin-card"><img className="logo-image" src="/hiker-logo.png" alt="HIKER" />
-    <h1>HIKER+  Factory</h1><p>Enter your PIN to open the factory system.</p><div className="pin-default">Default PIN: <b>1234</b></div><input autoFocus inputMode="numeric" type="password" value={pin} onChange={e=>setPin(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit();}} placeholder="PIN code"/><button className="primary full" onClick={submit}><Lock size={18}/> Unlock Dashboard</button>{error&&<div className="pin-error">{error}</div>}</div></div>;
+  const [pin,setPin]=useState('');
+  const [error,setError]=useState('');
+
+  const firstTime = !localStorage.getItem('hiker_pin_initialized');
+
+  const submit=()=>{
+    const saved=localStorage.getItem('hiker_pin')||'1234';
+
+    if(pin===saved){
+      setError('');
+
+      if(firstTime){
+        localStorage.setItem('hiker_pin_initialized','true');
+      }
+
+      onUnlock();
+    }else{
+      setError('Incorrect PIN.');
+      setPin('');
+    }
+  };
+
+  return (
+    <div className="pin-gate">
+      <div className="pin-card">
+
+        <div className="logo">H+</div>
+
+        <h1>HIKER+ ERP</h1>
+
+        <p>
+          Enter your PIN to open the factory system.
+        </p>
+
+        {firstTime && (
+          <div className="pin-default">
+            Default PIN: <b>1234</b>
+          </div>
+        )}
+
+        <input
+          autoFocus
+          inputMode="numeric"
+          type="password"
+          value={pin}
+          onChange={e=>setPin(e.target.value)}
+          onKeyDown={e=>{
+            if(e.key==='Enter')submit();
+          }}
+          placeholder="PIN code"
+        />
+
+        <button
+          className="primary full"
+          onClick={submit}
+        >
+          <Lock size={18}/>
+          Unlock Dashboard
+        </button>
+
+        {error&&(
+          <div className="pin-error">
+            {error}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }
 
 function Sidebar({page,setPage}:{page:string;setPage:(p:string)=>void}){
