@@ -720,12 +720,138 @@ function SettingsPage(){
   return <div><PageTitle title="Settings" sub="HIKER+ system preferences and security."/><div className="panel settings-list">{['Company name: HIKER SHOES','Currency: PKR','Carton units: 12 / 18 / 24 pairs','Upper bags: 100 / 150 pairs','Raw Stock categories: Uppers / Chemical / Manual'].map(x=><div className="list-row" key={x}><span>{x}</span><ChevronRight size={18}/></div>)}</div><div className="panel"><div className="panel-head"><div><b>App PIN</b><small>Change the PIN required before opening the ERP.</small></div><Lock size={20}/></div><div className="form-grid"><Input label="New PIN (4–8 digits)" type="password" value={pin} onChange={setPin}/><button className="primary" onClick={savePin}>Save PIN</button>{saved&&<div className="calc">PIN changed successfully.</div>}</div></div></div>;}
 
 function Recycle({records,load,setNotice}:any){
-  const rows=records.recycle||[];
-  const restore=async(id:string)=>{await api.post('/api/recycle/restore',{id});await load();};
-  const purge=async(id:string)=>{if(confirm('Permanently delete this record? This cannot be undone.')){try{await api.delete('/api/recycle/'+id);await load();}catch(e:any){setNotice('Permanent delete failed: '+(e?.response?.data?.message||e?.message||'Unknown error'));}}};
-  return <div><PageTitle title="Recycle Bin" sub="Deleted records are kept here first. Restore returns them to their original menu."/><div className="panel">{rows.length?rows.map((r:any)=><div className="recycle-row" key={r.id}><div><b>{r.record?.invoiceNumber||r.record?.name||r.record?.article||r.originalTable}</b><small>{r.originalTable} • deleted {r.deletedAt}</small></div><div><button className="restore" onClick={()=>restore(r.id)}><RotateCcw size={16}/> Restore</button><button className="danger" onClick={()=>purge(r.id)}><Trash2 size={16}/> Delete</button></div></div>):<Empty text="Recycle Bin is empty."/>}</div></div>;
-}
+  const rows = records.recycle || [];
 
+  const restore = async (id:string) => {
+    try {
+      const {
+        data: { user: supabaseUser },
+        error: userError
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!supabaseUser) throw new Error('No signed-in user.');
+
+      const recycleRow = rows.find((r:any) => String(r.id) === String(id));
+
+      if (!recycleRow) {
+        throw new Error('Recycle record not found.');
+      }
+
+      const originalTable = recycleRow.originalTable;
+      const originalRecord = recycleRow.record || recycleRow.originalRecord;
+
+      if (!originalTable || !originalRecord) {
+        throw new Error('Original record data is missing.');
+      }
+
+      const { error: restoreError } = await supabase
+        .from('erp_records')
+        .insert({
+          user_id: supabaseUser.id,
+          table_name: originalTable,
+          data: originalRecord
+        });
+
+      if (restoreError) throw restoreError;
+
+      const { error: deleteError } = await supabase
+        .from('erp_records')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', supabaseUser.id);
+
+      if (deleteError) throw deleteError;
+
+      await load();
+      setNotice('Record restored successfully.');
+    } catch (e:any) {
+      console.error('RESTORE ERROR:', e);
+      setNotice('Restore failed: ' + (e?.message || 'Unknown error.'));
+    }
+  };
+
+  const purge = async (id:string) => {
+    if (!confirm('Permanently delete this record? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const {
+        data: { user: supabaseUser },
+        error: userError
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!supabaseUser) throw new Error('No signed-in user.');
+
+      const { error } = await supabase
+        .from('erp_records')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', supabaseUser.id);
+
+      if (error) throw error;
+
+      await load();
+      setNotice('Record permanently deleted.');
+    } catch (e:any) {
+      console.error('PURGE ERROR:', e);
+      setNotice('Permanent delete failed: ' + (e?.message || 'Unknown error.'));
+    }
+  };
+
+  return (
+    <div>
+      <PageTitle
+        title="Recycle Bin"
+        sub="Deleted records are kept here first. Restore returns them to their original menu."
+      />
+
+      <div className="panel">
+        {rows.length ? (
+          rows.map((r:any) => (
+            <div className="recycle-row" key={r.id}>
+              <div>
+                <b>
+                  {r.record?.invoiceNumber ||
+                   r.record?.name ||
+                   r.record?.article ||
+                   r.originalRecord?.invoiceNumber ||
+                   r.originalRecord?.name ||
+                   r.originalRecord?.article ||
+                   r.originalTable}
+                </b>
+
+                <small>
+                  {r.originalTable} • deleted {r.deletedAt}
+                </small>
+              </div>
+
+              <div>
+                <button
+                  className="restore"
+                  onClick={() => restore(r.id)}
+                >
+                  <RotateCcw size={16}/> Restore
+                </button>
+
+                <button
+                  className="danger"
+                  onClick={() => purge(r.id)}
+                >
+                  <Trash2 size={16}/> Delete
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <Empty text="Recycle Bin is empty."/>
+        )}
+      </div>
+    </div>
+  );
+}
 function DatabasePage({records,setNotice}:any){
   const tables=Object.entries(records).map(([name,rows])=>({name,count:(rows as any[]).length}));
   const backup=()=>{const payload={app:'HIKER+ Factory ERP',exportedAt:new Date().toISOString(),tables:records};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='HIKER_ERP_DATABASE_BACKUP_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);setNotice('Database backup downloaded.');};
