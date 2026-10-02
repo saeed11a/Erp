@@ -331,14 +331,22 @@ const remove = async (table: string, id: string) => {
       onClick={() => setProfileOpen(v => !v)}
     >
       <div className="profile-avatar">
-        {String(user.name||user.email||'H')
-          .slice(0,1)
-          .toUpperCase()}
-      </div>
+  {user.avatar ? (
+    <img
+      src={user.avatar}
+      alt=""
+    />
+  ) : (
+    String(user.name || user.email || 'H')
+      .slice(0, 1)
+      .toUpperCase()
+  )}
+</div>
 
-      <span className="profile-name">
-        {user.name||user.email}
-      </span>
+<span className="profile-name">
+  {user.name || user.email}
+</span>
+
 
       <ChevronRight
         size={16}
