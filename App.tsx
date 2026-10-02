@@ -296,12 +296,78 @@ function GoogleLoginGate({onSignedIn}:any){
   };
   return <div className="pin-gate"><div className="pin-card"><div className="logo">H+</div><h1>HIKER+ ERP</h1><p>Sign in with your Google account. Each Google account has its own private ERP workspace and data.</p><button className="primary full" onClick={signIn} disabled={busy}>{busy?'Signing in…':'Continue with Google'}</button>{error&&<div className="pin-error">{error}</div>}<small style={{display:'block',marginTop:14}}>Your ERP records stay in the cloud and are separated by Google account. The same Google account can use the same workspace on another device.</small></div></div>;
 }
-
 function PinGate({onUnlock}:any){
-  const [pin,setPin]=useState(''),[error,setError]=useState('');
-  const submit=()=>{const saved=localStorage.getItem('hiker_pin')||'1234';if(pin===saved){setError('');onUnlock();}else{setError('Incorrect PIN.');setPin('');}};
-  return <div className="pin-gate"><div className="pin-card"><div className="logo">H+</div><h1>HIKER+ ERP</h1><p>Enter your PIN to open the factory system.</p><div className="pin-default">Default PIN: <b>1234</b></div><input autoFocus inputMode="numeric" type="password" value={pin} onChange={e=>setPin(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit();}} placeholder="PIN code"/><button className="primary full" onClick={submit}><Lock size={18}/> Unlock Dashboard</button>{error&&<div className="pin-error">{error}</div>}</div></div>;
+  const [pin,setPin]=useState('');
+  const [error,setError]=useState('');
+
+  const firstTime = !localStorage.getItem('hiker_pin_initialized');
+
+  const submit=()=>{
+    const saved=localStorage.getItem('hiker_pin')||'1234';
+
+    if(pin===saved){
+      setError('');
+
+      if(firstTime){
+        localStorage.setItem('hiker_pin_initialized','true');
+      }
+
+      onUnlock();
+    }else{
+      setError('Incorrect PIN.');
+      setPin('');
+    }
+  };
+
+  return (
+    <div className="pin-gate">
+      <div className="pin-card">
+
+        <div className="logo">H+</div>
+
+        <h1>HIKER+ ERP</h1>
+
+        <p>
+          Enter your PIN to open the factory system.
+        </p>
+
+        {firstTime && (
+          <div className="pin-default">
+            Default PIN: <b>1234</b>
+          </div>
+        )}
+
+        <input
+          autoFocus
+          inputMode="numeric"
+          type="password"
+          value={pin}
+          onChange={e=>setPin(e.target.value)}
+          onKeyDown={e=>{
+            if(e.key==='Enter')submit();
+          }}
+          placeholder="PIN code"
+        />
+
+        <button
+          className="primary full"
+          onClick={submit}
+        >
+          <Lock size={18}/>
+          Unlock Dashboard
+        </button>
+
+        {error&&(
+          <div className="pin-error">
+            {error}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }
+
 
 function Sidebar({page,setPage}:{page:string;setPage:(p:string)=>void}){
   const [open,setOpen]=useState(false);
