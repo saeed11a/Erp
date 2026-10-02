@@ -127,20 +127,24 @@ function App(){
     const updateUser = (supabaseUser: any) => {
       if (!active) return;
 
-      setUser(
-        supabaseUser
-          ? {
-              id: supabaseUser.id,
-              email: supabaseUser.email,
-              name:
-                supabaseUser.user_metadata?.full_name ||
-                supabaseUser.user_metadata?.name ||
-                supabaseUser.email ||
-                'User'
-            }
-          : null
-      );
-
+      
+setUser(
+  supabaseUser
+    ? {
+        id: supabaseUser.id,
+        email: supabaseUser.email,
+        name:
+          supabaseUser.user_metadata?.full_name ||
+          supabaseUser.user_metadata?.name ||
+          supabaseUser.email ||
+          'User',
+        avatar:
+          supabaseUser.user_metadata?.avatar_url ||
+          supabaseUser.user_metadata?.picture ||
+          ''
+      }
+    : null
+);
       setAuthReady(true);
     };
 
