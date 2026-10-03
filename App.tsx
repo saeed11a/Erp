@@ -2182,7 +2182,7 @@ return (
             className="primary"
             onClick={savePin}
           >
-            Save PIN
+            Save PIN 
           </button>
 
           {saved==='pin'&&(
