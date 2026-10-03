@@ -1907,3 +1907,88 @@ hr {
   letter-spacing: .04em !important;
   white-space: nowrap !important;
 }
+
+.invoice-table-head {
+  background: #F7F7F5 !important;
+}
+
+.invoice-table-head th {
+  color: #20232B !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+  white-space: nowrap !important;
+}
+.invoice-table-head + tbody tr {
+  background: #FFFFFF !important;
+}
+
+.invoice-table-head + tbody tr:hover {
+  background: #FAFAF8 !important;
+}
+
+.invoice-table-head + tbody td {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+
+/* Invoice number */
+.invoice-table-head + tbody td:first-child b {
+  font-weight: 750 !important;
+  color: #20232B !important;
+}
+
+/* Customer */
+.invoice-table-head + tbody td:nth-child(2) b {
+  font-weight: 650 !important;
+}
+
+/* Article */
+.invoice-table-head + tbody td:nth-child(3) {
+  font-weight: 600 !important;
+}
+
+/* Carton */
+.invoice-table-head + tbody td:nth-child(4) {
+  color: #55585F !important;
+}
+
+/* Cartons and pairs */
+.invoice-table-head + tbody td:nth-child(5),
+.invoice-table-head + tbody td:nth-child(6) {
+  font-weight: 650 !important;
+}
+
+/* Price */
+.invoice-table-head + tbody td:nth-child(7) {
+  white-space: nowrap !important;
+}
+
+/* Banam total */
+.invoice-table-head + tbody td:nth-child(8) {
+  white-space: nowrap !important;
+}
+
+/* Date */
+.invoice-table-head + tbody td:nth-child(9) {
+  white-space: nowrap !important;
+}
+@media (max-width: 700px) {
+  .panel .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .panel .table-wrap table {
+    min-width: 980px !important;
+    width: max-content !important;
+  }
+
+  .panel .table-wrap th,
+  .panel .table-wrap td {
+    padding: 10px 12px !important;
+  }
+}
