@@ -1462,14 +1462,28 @@ function Invoices({records,save,remove,openEdit}:any){
               {(records.invoices||[]).length} records
             </small>
           </div>
+<button
+  className="primary"
+  onClick={()=>{
+    if(showForm){
+      setShowForm(false);
+      return;
+    }
 
-          <button
-            className="primary"
-            onClick={()=>setShowForm(v=>!v)}
-          >
-            <Plus size={18}/>
-            {showForm?' Close':' New Invoice'}
-          </button>
+    setF({
+      customer:'',
+      article:'',
+      cartonType:'24 pairs',
+      cartons:'',
+      price:''
+    });
+
+    setShowForm(true);
+  }}
+>
+  <Plus size={18}/>
+  {showForm ? ' Close' : ' New Invoice'}
+</button>
         </div>
 
         {showForm&&(
@@ -2371,9 +2385,221 @@ function DatabasePage({records,setNotice}:any){
 
 function SimpleTable({title,table,rows,remove,openEdit}:any){
   const payments=table==='payments';
-  return <div className="panel"><div className="panel-head"><div><b>{title}</b><small>{rows.length} records</small></div></div><div className="table-wrap"><table><thead><tr>{payments?<><th>Type</th><th>Customer / Supplier</th><th>Amount</th><th>Jamma / Banam</th><th>Date</th><th>Note</th><th>Method</th></>:<><th>{table==='invoices'?'Customer':'Name'}</th><th>Article</th><th>Quantity/Pairs</th><th>Total</th><th>Date</th></>}<th>Actions</th></tr></thead><tbody>
-    {rows.map((r:any)=><tr key={r.id}>{payments?<><td>{r.type}</td><td><b>{r.name||'—'}</b></td><td>PKR {Number(r.amount||0).toLocaleString()}</td><td>{r.type==='Customer'?<span className="credit-text">Jamma / Credit</span>:<span className="debit-text">Banam / Debit</span>}</td><td>{r.date||'—'}{r.time&&<small className="invoice-no">{r.time}</small>}</td><td>{r.note||'—'}</td><td>{r.paymentMethod||'—'}</td></>:<><td>{r.name||r.customer||r.supplier||'—'}{table==='invoices'&&<small className="invoice-no">{r.invoiceNumber}</small>}</td><td>{r.article||'—'}</td><td>{r.pairs??r.quantity??r.cartons??'—'}</td><td>{r.total!=null?'PKR '+Number(r.total).toLocaleString():r.amount!=null?'PKR '+Number(r.amount).toLocaleString():'—'}</td><td>{r.date||'—'}</td></>}<td><RecordActions onEdit={()=>openEdit(table,r)} onDelete={()=>remove(table,r.id)}/></td></tr>)}
-  </tbody></table>{!rows.length&&<Empty text="No records found."/>}</div></div>;
+
+  return (
+    <div className="panel">
+
+      <div className="panel-head">
+        <div>
+          <b>{title}</b>
+          <small>{rows.length} records</small>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+
+              {payments ? (
+                <>
+                  <th>Type</th>
+                  <th>Customer / Supplier</th>
+                  <th>Amount</th>
+                  <th>Jamma / Banam</th>
+                  <th>Date</th>
+                  <th>Note</th>
+                  <th>Method</th>
+                </>
+              ) : table==='invoices' ? (
+                <>
+                  <th>Invoice</th>
+                  <th>Customer</th>
+                  <th>Article</th>
+                  <th>Carton</th>
+                  <th>Cartons</th>
+                  <th>Pairs</th>
+                  <th>Price / Pair</th>
+                  <th>Banam Total</th>
+                  <th>Date</th>
+                </>
+              ) : (
+                <>
+                  <th>Name</th>
+                  <th>Article</th>
+                  <th>Quantity/Pairs</th>
+                  <th>Total</th>
+                  <th>Date</th>
+                </>
+              )}
+
+              <th>Actions</th>
+
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {rows.map((r:any)=>(
+              <tr key={r.id}>
+
+                {payments ? (
+                  <>
+                    <td>
+                      {r.type}
+                    </td>
+
+                    <td>
+                      <b>
+                        {r.name||'—'}
+                      </b>
+                    </td>
+
+                    <td>
+                      PKR {Number(
+                        r.amount||0
+                      ).toLocaleString()}
+                    </td>
+
+                    <td>
+                      {r.type==='Customer' ? (
+                        <span className="credit-text">
+                          Jamma / Credit
+                        </span>
+                      ) : (
+                        <span className="debit-text">
+                          Banam / Debit
+                        </span>
+                      )}
+                    </td>
+
+                    <td>
+                      {r.date||'—'}
+
+                      {r.time&&(
+                        <small className="invoice-no">
+                          {r.time}
+                        </small>
+                      )}
+                    </td>
+
+                    <td>
+                      {r.note||'—'}
+                    </td>
+
+                    <td>
+                      {r.paymentMethod||'—'}
+                    </td>
+                  </>
+                ) : table==='invoices' ? (
+                  <>
+                    <td>
+                      <b>
+                        {r.invoiceNumber||'—'}
+                      </b>
+                    </td>
+
+                    <td>
+                      <b>
+                        {r.customer||'—'}
+                      </b>
+                    </td>
+
+                    <td>
+                      {r.article||'—'}
+                    </td>
+
+                    <td>
+                      {r.cartonType||'—'}
+                    </td>
+
+                    <td>
+                      {r.cartons??'—'}
+                    </td>
+
+                    <td>
+                      {r.pairs??'—'}
+                    </td>
+
+                    <td>
+                      PKR {Number(
+                        r.price||0
+                      ).toLocaleString()}
+                    </td>
+
+                    <td>
+                      <span className="debit-text">
+                        PKR {Number(
+                          r.total||0
+                        ).toLocaleString()}
+                      </span>
+                    </td>
+
+                    <td>
+                      {r.date||'—'}
+
+                      {r.time&&(
+                        <small className="invoice-no">
+                          {r.time}
+                        </small>
+                      )}
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td>
+                      <b>
+                        {r.name||r.customer||r.supplier||'—'}
+                      </b>
+                    </td>
+
+                    <td>
+                      {r.article||'—'}
+                    </td>
+
+                    <td>
+                      {r.pairs??r.quantity??r.cartons??'—'}
+                    </td>
+
+                    <td>
+                      {r.total!=null
+                        ? 'PKR '+Number(r.total).toLocaleString()
+                        : r.amount!=null
+                          ? 'PKR '+Number(r.amount).toLocaleString()
+                          : '—'
+                      }
+                    </td>
+
+                    <td>
+                      {r.date||'—'}
+                    </td>
+                  </>
+                )}
+
+                <td>
+                  <RecordActions
+                    onEdit={()=>openEdit(table,r)}
+                    onDelete={()=>remove(table,r.id)}
+                  />
+                </td>
+
+              </tr>
+            ))}
+
+          </tbody>
+
+        </table>
+
+        {!rows.length&&(
+          <Empty text="No records found."/>
+        )}
+
+      </div>
+
+    </div>
+  );
 }
 
 function RecordActions({onEdit,onDelete}:any){return <div className="record-actions"><button className="edit-btn" onClick={onEdit} title="Edit"><Edit3 size={15}/></button><button className="danger-icon" onClick={onDelete} title="Move to Recycle Bin"><Trash2 size={16}/></button></div>;}
