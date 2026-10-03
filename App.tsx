@@ -1296,32 +1296,391 @@ function Purchases({records,save,update,remove,openEdit}:any){
   );
         }
 
+
 function Invoices({records,save,remove,openEdit}:any){
-  const [f,setF]=useState({customer:'',article:'',cartonType:'24 pairs',cartons:'',price:''}),[showForm,setShowForm]=useState(false);
-  const pairs=(Number(f.cartons)||0)*cartonPairs[f.cartonType],total=pairs*(Number(f.price)||0);
-  const articleOptions=useMemo(()=>{const set=new Set<string>();(records.readyShoes||[]).forEach((r:any)=>r.article&&set.add(String(r.article)));(records.articles||[]).forEach((r:any)=>r.article&&set.add(String(r.article)));(records.rawStock||[]).filter((r:any)=>r.category==='Uppers').forEach((r:any)=>r.article&&set.add(String(r.article)));return [...set];},[records]);
-  const customerOptions=useMemo(()=>{const m=new Map<string,string>();(records.customers||[]).forEach((r:any)=>{if(r.name&&!m.has(String(r.name).toLowerCase()))m.set(String(r.name).toLowerCase(),String(r.name));});return [...m.values()];},[records]);
-  const readyRows=(records.readyShoes||[]).filter((r:any)=>same(r.article,f.article));
-  const readyPairs=readyRows.reduce((s:number,r:any)=>s+Number(r.availablePairs??r.totalPairs??0),0);
-  const readyCartons=readyRows.reduce((s:number,r:any)=>s+Math.floor(Number(r.availablePairs??r.totalPairs??0)/(cartonPairs[r.cartonType]||1)),0);
-  const readyCartonTypes=[...new Set(readyRows.map((r:any)=>r.cartonType).filter(Boolean))] as string[];
-  useEffect(()=>{if(!f.article)return;const preferred=readyRows.find((r:any)=>Number(r.availablePairs??r.totalPairs??0)>0)?.cartonType;if(preferred&&preferred!==f.cartonType)setF((x:any)=>({...x,cartonType:preferred}));},[f.article,records.readyShoes]);
-  const customerExists=customerOptions.some((n:string)=>same(n,f.customer));
-  const canInvoice=Boolean(f.customer&&f.article&&pairs>0&&pairs<=readyPairs);
-  return <div><PageTitle title="Invoices" sub="Banam = invoice/debit. Customer must pay. Banam is red; Jamma/payment credit is blue."/>
-    <div className="panel"><div className="panel-head"><div><b>Invoice Register</b><small>{(records.invoices||[]).length} records</small></div><button className="primary" onClick={()=>setShowForm(v=>!v)}><Plus size={18}/>{showForm?' Close':' New Invoice'}</button></div>
-    {showForm&&<div className="form-panel invoice-form-panel">
-  <div className="invoice-form-grid">
-      <label className="field"><span>Customer</span><input list="invoice-customers" value={f.customer} onChange={e=>setF({...f,customer:e.target.value})}/><datalist id="invoice-customers">{customerOptions.map((n:string)=><option key={n} value={n}/>)}</datalist><small className={customerExists?'credit-text':'debit-text'}>{customerExists?'Existing customer':'New customer will be created automatically'}</small></label>
-      <Select label="Article" value={f.article} options={articleOptions} onChange={v=>setF({...f,article:v})}/>
-      <div className="stock-available"><span>Ready Shoes available for {f.article||'selected article'}</span><b>{readyPairs.toLocaleString()} pairs</b><strong>{readyCartons.toLocaleString()} cartons stored</strong>{readyRows.length>0&&<small>{readyRows.map((r:any)=>{const p=Number(r.availablePairs??r.totalPairs??0);return (p>0?(Math.floor(p/(cartonPairs[r.cartonType]||1))+' × '+r.cartonType):'')}).filter(Boolean).join(' • ')}</small>}</div>
-      <Select label="Carton" value={f.cartonType} options={readyCartonTypes.length?[...new Set([...readyCartonTypes,...Object.keys(cartonPairs)])]:Object.keys(cartonPairs)} onChange={v=>setF({...f,cartonType:v})}/><Input label="Cartons" type="number" value={f.cartons} onChange={v=>setF({...f,cartons:v})}/><Input label="Price per pair" type="number" value={f.price} onChange={v=>setF({...f,price:v})}/>
-      <div className="calc">Pairs: <b>{pairs.toLocaleString()}</b> • Banam Total: <b className="debit-text">PKR {total.toLocaleString()}</b> • {pairs>readyPairs?<span className="debit-text">Insufficient Ready Shoes</span>:<span className="credit-text">Stock available</span>}</div><button className="primary full" disabled={!canInvoice} onClick={async()=>{await save('invoices',{...f,pairs,total,date:new Date().toISOString().slice(0,10),time:new Date().toLocaleTimeString(),invoiceNumber:'INV-'+Date.now(),entryType:'Banam',createdAt:new Date().toISOString()});setShowForm(false);}}><FileText size={18}/> Create invoice (Banam)</button>
-    </div></div>}
-    <SimpleTable title="" table="invoices" rows={records.invoices||[]} remove={remove} openEdit={openEdit}/>
+  const [f,setF]=useState({
+    customer:'',
+    article:'',
+    cartonType:'24 pairs',
+    cartons:'',
+    price:''
+  });
+
+  const [showForm,setShowForm]=useState(false);
+
+  const pairs =
+    (Number(f.cartons)||0) *
+    (cartonPairs[f.cartonType] || 0);
+
+  const total =
+    pairs *
+    (Number(f.price)||0);
+
+  const articleOptions=useMemo(()=>{
+    const set=new Set<string>();
+
+    (records.readyShoes||[]).forEach((r:any)=>{
+      if(r.article){
+        set.add(String(r.article));
+      }
+    });
+
+    (records.articles||[]).forEach((r:any)=>{
+      if(r.article){
+        set.add(String(r.article));
+      }
+    });
+
+    (records.rawStock||[])
+      .filter((r:any)=>r.category==='Uppers')
+      .forEach((r:any)=>{
+        if(r.article){
+          set.add(String(r.article));
+        }
+      });
+
+    return [...set];
+  },[records]);
+
+  const customerOptions=useMemo(()=>{
+    const m=new Map<string,string>();
+
+    (records.customers||[]).forEach((r:any)=>{
+      if(r.name){
+        const name=String(r.name);
+        const key=name.toLowerCase();
+
+        if(!m.has(key)){
+          m.set(key,name);
+        }
+      }
+    });
+
+    return [...m.values()];
+  },[records]);
+
+  const readyRows=(records.readyShoes||[])
+    .filter((r:any)=>same(r.article,f.article));
+
+  const readyPairs=readyRows.reduce(
+    (sum:number,r:any)=>
+      sum+Number(r.availablePairs??r.totalPairs??0),
+    0
+  );
+
+  const readyCartons=readyRows.reduce(
+    (sum:number,r:any)=>
+      sum+
+      Math.floor(
+        Number(r.availablePairs??r.totalPairs??0) /
+        (cartonPairs[r.cartonType]||1)
+      ),
+    0
+  );
+
+  const readyCartonTypes=[
+    ...new Set(
+      readyRows
+        .map((r:any)=>r.cartonType)
+        .filter(Boolean)
+    )
+  ] as string[];
+
+  useEffect(()=>{
+    if(!f.article)return;
+
+    const preferred=readyRows.find(
+      (r:any)=>
+        Number(r.availablePairs??r.totalPairs??0)>0
+    )?.cartonType;
+
+    if(
+      preferred &&
+      preferred!==f.cartonType
+    ){
+      setF((x:any)=>({
+        ...x,
+        cartonType:preferred
+      }));
+    }
+  },[f.article,records.readyShoes]);
+
+  const customerExists=customerOptions.some(
+    (n:string)=>same(n,f.customer)
+  );
+
+  const canInvoice=Boolean(
+    f.customer &&
+    f.article &&
+    pairs>0 &&
+    pairs<=readyPairs
+  );
+
+  const createInvoice=async()=>{
+    if(!canInvoice)return;
+
+    const now=new Date();
+
+    await save('invoices',{
+      ...f,
+      cartons:Number(f.cartons)||0,
+      price:Number(f.price)||0,
+      pairs,
+      total,
+      date:now.toISOString().slice(0,10),
+      time:now.toLocaleTimeString(),
+      invoiceNumber:'INV-'+Date.now(),
+      entryType:'Banam',
+      createdAt:now.toISOString()
+    });
+
+    setF({
+      customer:'',
+      article:'',
+      cartonType:'24 pairs',
+      cartons:'',
+      price:''
+    });
+
+    setShowForm(false);
+  };
+
+  return (
+    <div>
+
+      <PageTitle
+        title="Invoices"
+        sub="Banam = invoice/debit. Customer must pay. Banam is red; Jamma/payment credit is blue."
+      />
+
+      <div className="panel">
+
+        <div className="panel-head">
+          <div>
+            <b>Invoice Register</b>
+            <small>
+              {(records.invoices||[]).length} records
+            </small>
+          </div>
+
+          <button
+            className="primary"
+            onClick={()=>setShowForm(v=>!v)}
+          >
+            <Plus size={18}/>
+            {showForm?' Close':' New Invoice'}
+          </button>
+        </div>
+
+        {showForm&&(
+          <div className="form-panel invoice-form-panel">
+
+            <div className="invoice-form-grid">
+
+              <label className="field">
+                <span>Customer</span>
+
+                <input
+                  list="invoice-customers"
+                  value={f.customer}
+                  onChange={e=>
+                    setF({
+                      ...f,
+                      customer:e.target.value
+                    })
+                  }
+                />
+
+                <datalist id="invoice-customers">
+                  {customerOptions.map(
+                    (n:string)=>(
+                      <option
+                        key={n}
+                        value={n}
+                      />
+                    )
+                  )}
+                </datalist>
+
+                <small
+                  className={
+                    customerExists
+                      ? 'credit-text'
+                      : 'debit-text'
+                  }
+                >
+                  {customerExists
+                    ? 'Existing customer'
+                    : 'New customer will be created automatically'}
+                </small>
+              </label>
+
+              <Select
+                label="Article"
+                value={f.article}
+                options={articleOptions}
+                onChange={v=>
+                  setF({
+                    ...f,
+                    article:v
+                  })
+                }
+              />
+
+              <div className="stock-available">
+
+                <span>
+                  Ready Shoes available for{' '}
+                  {f.article||'selected article'}
+                </span>
+
+                <b>
+                  {readyPairs.toLocaleString()} pairs
+                </b>
+
+                <strong>
+                  {readyCartons.toLocaleString()} cartons stored
+                </strong>
+
+                {readyRows.length>0&&(
+                  <small>
+                    {readyRows
+                      .map((r:any)=>{
+                        const p=Number(
+                          r.availablePairs??
+                          r.totalPairs??
+                          0
+                        );
+
+                        return p>0
+                          ? (
+                            Math.floor(
+                              p/
+                              (cartonPairs[r.cartonType]||1)
+                            )+
+                            ' × '+
+                            r.cartonType
+                          )
+                          : '';
+                      })
+                      .filter(Boolean)
+                      .join(' • ')}
+                  </small>
+                )}
+
+              </div>
+
+              <Select
+                label="Carton"
+                value={f.cartonType}
+                options={
+                  readyCartonTypes.length
+                    ? [
+                        ...new Set([
+                          ...readyCartonTypes,
+                          ...Object.keys(cartonPairs)
+                        ])
+                      ]
+                    : Object.keys(cartonPairs)
+                }
+                onChange={v=>
+                  setF({
+                    ...f,
+                    cartonType:v
+                  })
+                }
+              />
+
+              <Input
+                label="Cartons"
+                type="number"
+                value={f.cartons}
+                onChange={v=>
+                  setF({
+                    ...f,
+                    cartons:v
+                  })
+                }
+              />
+
+              <Input
+                label="Price per pair"
+                type="number"
+                value={f.price}
+                onChange={v=>
+                  setF({
+                    ...f,
+                    price:v
+                  })
+                }
+              />
+
+              <div className="invoice-summary">
+
+                <div className="invoice-summary-item">
+                  <span>Pairs</span>
+                  <b>
+                    {pairs.toLocaleString()}
+                  </b>
+                </div>
+
+                <div className="invoice-summary-item">
+                  <span>Price / Pair</span>
+                  <b>
+                    PKR {Number(
+                      f.price||0
+                    ).toLocaleString()}
+                  </b>
+                </div>
+
+                <div className="invoice-summary-item invoice-total">
+                  <span>Banam Total</span>
+                  <b className="debit-text">
+                    PKR {total.toLocaleString()}
+                  </b>
+                </div>
+
+                <div
+                  className={
+                    pairs>readyPairs
+                      ? 'invoice-stock-status invoice-stock-error'
+                      : 'invoice-stock-status invoice-stock-ok'
+                  }
+                >
+                  {pairs>readyPairs
+                    ? 'Insufficient Ready Shoes'
+                    : '✓ Ready Shoes available'}
+                </div>
+
+              </div>
+
+              <button
+                className="primary full"
+                disabled={!canInvoice}
+                onClick={createInvoice}
+              >
+                <FileText size={18}/>
+                Create invoice (Banam)
+              </button>
+
+            </div>
+
+          </div>
+        )}
+
+        <SimpleTable
+          title=""
+          table="invoices"
+          rows={records.invoices||[]}
+          remove={remove}
+          openEdit={openEdit}
+        />
+
+      </div>
+
     </div>
-  </div>;
-}
+  );
+                  }
 
 function Payments({records,save,remove,openEdit}:any){
   const [f,setF]=useState({type:'Customer',name:'',amount:'',paymentMethod:'Cash',note:''}),[showForm,setShowForm]=useState(false);
