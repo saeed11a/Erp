@@ -1525,3 +1525,40 @@ hr {
     margin-top: 4px !important;
   }
 }
+.invoice-form-panel {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.invoice-form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.invoice-form-grid > * {
+  min-width: 0 !important;
+}
+
+.invoice-form-grid .stock-available,
+.invoice-form-grid .calc,
+.invoice-form-grid .full {
+  grid-column: 1 / -1 !important;
+}
+
+.invoice-form-grid .stock-available {
+  padding: 16px !important;
+  border-radius: 14px !important;
+  background: #F7F7F5 !important;
+  border: 1px solid #E5E2DD !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 700px) {
+  .invoice-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
