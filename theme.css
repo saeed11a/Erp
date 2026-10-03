@@ -1894,3 +1894,16 @@ hr {
   text-transform: uppercase !important;
   letter-spacing: .04em !important;
 }
+
+.invoice-table-head {
+  background: #F7F7F5 !important;
+}
+
+.invoice-table-head th {
+  color: #20232B !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+  white-space: nowrap !important;
+}
