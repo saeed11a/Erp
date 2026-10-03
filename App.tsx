@@ -1762,83 +1762,476 @@ openEdit={openEdit}
                   HIKER+ {createdInvoice.article}
                 </strong>
 
-                <small>
-                  {createdInvoice.cartonType} carton
-                </small>
-              </td>
+                function Invoices({records,save,remove,openEdit}:any){
+  const customers=(records.customers||[]) as any[];
+  const articles=(records.articles||[]) as any[];
 
-              <td>
-                PKR {Number(createdInvoice.price || 0).toLocaleString()}
-              </td>
+  const [showForm,setShowForm]=useState(false);
+  const [showPreview,setShowPreview]=useState(false);
 
-              <td>
-                {Number(createdInvoice.pairs || 0).toLocaleString()} pairs
-              </td>
+  const [f,setF]=useState({
+    customer:'',
+    article:'',
+    size:'',
+    color:'',
+    cartonType:'18-pair carton',
+    cartons:'',
+    pairs:'',
+    price:'',
+    discount:'',
+    tax:'',
+    notes:'',
+    terms:'Payment due as agreed.',
+    date:new Date().toISOString().slice(0,10)
+  });
 
-              <td>
-                PKR {Number(createdInvoice.total || 0).toLocaleString()}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  const [createdInvoice,setCreatedInvoice]=useState<any>(null);
 
-        <div className="print-invoice-bottom">
+  const cartonPairs:any={
+    '12-pair carton':12,
+    '18-pair carton':18,
+    '24-pair carton':24
+  };
 
+  const customerNames=useMemo(()=>{
+    const m=new Map<string,string>();
+    customers.forEach((r:any)=>{
+      const n=String(r.name||'').trim();
+      if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);
+    });
+    return [...m.values()];
+  },[customers]);
+
+  const articleNames=useMemo(()=>{
+    const m=new Map<string,string>();
+    articles.forEach((r:any)=>{
+      const n=String(r.name||r.article||r.code||'').trim();
+      if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);
+    });
+    return [...m.values()];
+  },[articles]);
+
+  const calculatedPairs=
+    Number(f.pairs||0)>0
+      ? Number(f.pairs||0)
+      : Number(f.cartons||0)*(cartonPairs[f.cartonType]||0);
+
+  const subTotal=calculatedPairs*Number(f.price||0);
+  const discount=Number(f.discount||0);
+  const tax=Number(f.tax||0);
+  const total=Math.max(0,subTotal-discount+tax);
+
+  const submit=async()=>{
+    if(!f.customer.trim()||!f.article.trim()||calculatedPairs<=0||Number(f.price)<=0){
+      return;
+    }
+
+    const invoice={
+      ...f,
+      customer:f.customer.trim(),
+      article:f.article.trim(),
+      cartons:Number(f.cartons||0),
+      pairs:calculatedPairs,
+      price:Number(f.price||0),
+      subtotal:subTotal,
+      discount,
+      tax,
+      total,
+      createdAt:new Date().toISOString()
+    };
+
+    await save('invoices',invoice);
+    setCreatedInvoice(invoice);
+    setShowForm(false);
+    setShowPreview(true);
+
+    setF({
+      customer:'',
+      article:'',
+      size:'',
+      color:'',
+      cartonType:'18-pair carton',
+      cartons:'',
+      pairs:'',
+      price:'',
+      discount:'',
+      tax:'',
+      notes:'',
+      terms:'Payment due as agreed.',
+      date:new Date().toISOString().slice(0,10)
+    });
+  };
+
+  const printInvoice=()=>{
+    window.print();
+  };
+
+  return (
+    <div>
+      <PageTitle
+        title="Invoices"
+        sub="Create customer invoices using pairs, cartons, prices and payment information."
+      />
+
+      <div className="panel">
+        <div className="panel-head">
           <div>
-            <strong>PAYMENT INFO</strong>
-            <span>Customer: {createdInvoice.customer}</span>
-            <span>Entry: Banam / Sale</span>
-            <span>
-              Quantity: {createdInvoice.pairs} pairs
-            </span>
-
-            <div>
-              Authorized Signature
-            </div>
+            <b>Invoice Register</b>
+            <small>{(records.invoices||[]).length} invoices</small>
           </div>
 
-          <div>
+          <button
+            className="primary"
+            onClick={()=>setShowForm(v=>!v)}
+          >
+            <Plus size={18}/>
+            {showForm?' Close':' New Invoice'}
+          </button>
+        </div>
 
-            <div>
-              <span>Sub Total</span>
-              <strong>
-                PKR {Number(createdInvoice.total || 0).toLocaleString()}
-              </strong>
+        {showForm&&(
+          <div className="form-panel">
+            <div className="form-grid">
+
+              <label className="field">
+                <span>Customer</span>
+                <input
+                  list="invoice-customers"
+                  value={f.customer}
+                  onChange={e=>setF({...f,customer:e.target.value})}
+                  placeholder="Select or type customer"
+                />
+                <datalist id="invoice-customers">
+                  {customerNames.map((n:string)=>
+                    <option key={n} value={n}/>
+                  )}
+                </datalist>
+              </label>
+
+              <label className="field">
+                <span>Article</span>
+                <input
+                  list="invoice-articles"
+                  value={f.article}
+                  onChange={e=>setF({...f,article:e.target.value})}
+                  placeholder="Select article"
+                />
+                <datalist id="invoice-articles">
+                  {articleNames.map((n:string)=>
+                    <option key={n} value={n}/>
+                  )}
+                </datalist>
+              </label>
+
+              <Input
+                label="Size"
+                value={f.size}
+                onChange={v=>setF({...f,size:v})}
+              />
+
+              <Input
+                label="Color"
+                value={f.color}
+                onChange={v=>setF({...f,color:v})}
+              />
+
+              <Select
+                label="Carton Type"
+                value={f.cartonType}
+                options={[
+                  '12-pair carton',
+                  '18-pair carton',
+                  '24-pair carton'
+                ]}
+                onChange={v=>setF({...f,cartonType:v})}
+              />
+
+              <Input
+                label="Cartons"
+                type="number"
+                value={f.cartons}
+                onChange={v=>setF({...f,cartons:v,pairs:''})}
+              />
+
+              <Input
+                label="Pairs"
+                type="number"
+                value={f.pairs}
+                onChange={v=>setF({...f,pairs:v,cartons:''})}
+              />
+
+              <Input
+                label="Price / Pair"
+                type="number"
+                value={f.price}
+                onChange={v=>setF({...f,price:v})}
+              />
+
+              <Input
+                label="Discount"
+                type="number"
+                value={f.discount}
+                onChange={v=>setF({...f,discount:v})}
+              />
+
+              <Input
+                label="Tax"
+                type="number"
+                value={f.tax}
+                onChange={v=>setF({...f,tax:v})}
+              />
+
+              <Input
+                label="Date"
+                type="date"
+                value={f.date}
+                onChange={v=>setF({...f,date:v})}
+              />
+
+              <Input
+                label="Notes"
+                value={f.notes}
+                onChange={v=>setF({...f,notes:v})}
+              />
+
+              <label className="field">
+                <span>Terms & Conditions</span>
+                <textarea
+                  value={f.terms}
+                  onChange={e=>setF({...f,terms:e.target.value})}
+                  rows={3}
+                />
+              </label>
+
+              <div className="calc">
+                <span>
+                  Quantity: <b>{calculatedPairs.toLocaleString()} pairs</b>
+                </span>
+                <span>
+                  Sub Total: <b>PKR {subTotal.toLocaleString()}</b>
+                </span>
+                <span>
+                  Total: <b>PKR {total.toLocaleString()}</b>
+                </span>
+              </div>
+
+              <button
+                className="primary full"
+                onClick={submit}
+              >
+                <CreditCard size={18}/>
+                Create Invoice
+              </button>
+
             </div>
-
-            <div>
-              <span>Discount</span>
-              <strong>PKR 0</strong>
-            </div>
-
-            <div>
-              <span>Tax</span>
-              <strong>PKR 0</strong>
-            </div>
-
-            <div>
-              <span>Total</span>
-              <strong>
-                PKR {Number(createdInvoice.total || 0).toLocaleString()}
-              </strong>
-            </div>
-
           </div>
-        </div>
+        )}
 
-        <div className="print-invoice-footer">
-          Thank you for your business
-          <strong>HIKER+ • SHOES FACTORY</strong>
-        </div>
-
+        <SimpleTable
+          title=""
+          table="invoices"
+          rows={records.invoices||[]}
+          remove={remove}
+          openEdit={openEdit}
+        />
       </div>
+
+      {showPreview&&createdInvoice&&(
+        <div className="invoice-modal">
+          <div className="invoice-overlay" onClick={()=>setShowPreview(false)}/>
+
+          <div className="invoice-popup">
+
+            <div className="invoice-actions">
+              <button
+                className="secondary"
+                onClick={()=>setShowPreview(false)}
+              >
+                Close
+              </button>
+
+              <button
+                className="primary"
+                onClick={printInvoice}
+              >
+                Print Invoice
+              </button>
+            </div>
+
+            <div className="print-invoice">
+
+              <div className="print-invoice-header">
+
+                <div>
+                  <h1>HIKER+</h1>
+                  <strong>SHOES FACTORY</strong>
+                  <p>Professional Footwear Manufacturing</p>
+                </div>
+
+                <div className="invoice-title">
+                  <h2>INVOICE</h2>
+                  <span>
+                    {createdInvoice.date}
+                  </span>
+                </div>
+
+              </div>
+
+              <div className="invoice-info-grid">
+
+                <div>
+                  <strong>BILL TO</strong>
+                  <span>{createdInvoice.customer}</span>
+                </div>
+
+                <div>
+                  <strong>INVOICE DATE</strong>
+                  <span>{createdInvoice.date}</span>
+                </div>
+
+                <div>
+                  <strong>ARTICLE</strong>
+                  <span>{createdInvoice.article}</span>
+                </div>
+
+                <div>
+                  <strong>SIZE / COLOR</strong>
+                  <span>
+                    {createdInvoice.size||'-'} / {createdInvoice.color||'-'}
+                  </span>
+                </div>
+
+              </div>
+
+              <table className="invoice-items">
+                <thead>
+                  <tr>
+                    <th>DESCRIPTION</th>
+                    <th>PACKING</th>
+                    <th>PRICE</th>
+                    <th>QTY</th>
+                    <th>AMOUNT</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>{createdInvoice.article}</strong>
+                      <small>
+                        {createdInvoice.size||'-'} / {createdInvoice.color||'-'}
+                      </small>
+                    </td>
+
+                    <td>
+                      <strong>
+                        {createdInvoice.cartons||0}
+                      </strong>
+                      <small>
+                        {createdInvoice.cartonType}
+                      </small>
+                    </td>
+
+                    <td>
+                      PKR {Number(createdInvoice.price||0).toLocaleString()}
+                    </td>
+
+                    <td>
+                      {Number(createdInvoice.pairs||0).toLocaleString()} pairs
+                    </td>
+
+                    <td>
+                      PKR {Number(createdInvoice.subtotal||createdInvoice.total||0).toLocaleString()}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="print-invoice-bottom">
+
+                <div>
+
+                  <strong>PAYMENT INFORMATION</strong>
+
+                  <span>
+                    Customer: {createdInvoice.customer}
+                  </span>
+
+                  <span>
+                    Entry: Banam / Sale
+                  </span>
+
+                  <span>
+                    Quantity: {createdInvoice.pairs} pairs
+                  </span>
+
+                  <br/>
+
+                  <strong>TERMS & CONDITIONS</strong>
+
+                  <span>
+                    {createdInvoice.terms||'Payment due as agreed.'}
+                  </span>
+
+                  <div className="signature-box">
+                    Authorized Signature
+                  </div>
+
+                </div>
+
+                <div>
+
+                  <div>
+                    <span>Sub Total</span>
+                    <strong>
+                      PKR {Number(createdInvoice.subtotal||0).toLocaleString()}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Discount</span>
+                    <strong>
+                      PKR {Number(createdInvoice.discount||0).toLocaleString()}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Tax</span>
+                    <strong>
+                      PKR {Number(createdInvoice.tax||0).toLocaleString()}
+                    </strong>
+                  </div>
+
+                  <div className="invoice-grand-total">
+                    <span>Total</span>
+                    <strong>
+                      PKR {Number(createdInvoice.total||0).toLocaleString()}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="contact-information">
+                <strong>CONTACT INFORMATION</strong>
+                <span>HIKER+ • SHOES FACTORY</span>
+                <span>Made in Pakistan</span>
+              </div>
+
+              <div className="print-invoice-footer">
+                <span>Thank you for your business</span>
+                <strong>HIKER+ • SHOES FACTORY</strong>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
-</div>
-</div>
-);
-}
+  );
+                  }
+      
 function Payments({records,save,remove,openEdit}:any){
   const [f,setF]=useState({type:'Customer',name:'',amount:'',paymentMethod:'Cash',note:''}),[showForm,setShowForm]=useState(false);
   const names=useMemo(()=>{const rows=(f.type==='Customer'?records.customers:records.suppliers)||[];const m=new Map<string,string>();rows.forEach((r:any)=>{const n=String(r.name||'').trim();if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);});return [...m.values()];},[records,f.type]);
