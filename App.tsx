@@ -1294,7 +1294,8 @@ function Purchases({records,save,update,remove,openEdit}:any){
       />
     </div>
   );
-        }
+}
+
 function Invoices({records,save,remove,openEdit}:any){
   const customers=(records.customers||[]) as any[];
   const articles=(records.articles||[]) as any[];
