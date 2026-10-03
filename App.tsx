@@ -2705,7 +2705,7 @@ function uniqueNames(rows:any[]){return [...new Set(rows.map(r=>String(r.name||'
 function groupByName(rows:any[]){const m=new Map<string,any>();rows.forEach(r=>{const key=String(r.name||'').trim().toLowerCase();if(!key)return;if(!m.has(key))m.set(key,{key,name:r.name,source:r});});return {items:[...m.values()]};}
 function accountTotals(table:string,name:string,records:any[]){if(table==='customers'){const debit=(records.invoices||[]).filter((r:any)=>same(r.customer,name)).reduce((s:number,r:any)=>s+Number(r.total||0),0);const credit=(records.payments||[]).filter((r:any)=>r.type==='Customer'&&same(r.name,name)).reduce((s:number,r:any)=>s+Number(r.amount||0),0);return {credit,debit,balance:credit-debit};}const credit=(records.purchases||[]).filter((r:any)=>same(r.supplier,name)).reduce((s:number,r:any)=>s+Number(r.total||0),0);const debit=(records.payments||[]).filter((r:any)=>r.type==='Supplier'&&same(r.name,name)).reduce((s:number,r:any)=>s+Number(r.amount||0),0);return {credit,debit,balance:credit-debit};}
 function lastDays(n:number){const out:string[]=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(d.toISOString().slice(0,10));}return out;}
-
+}
 
                                                                                                                                                                                                                                                                                                                                                 
 export default App;
