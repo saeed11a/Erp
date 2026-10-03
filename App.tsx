@@ -1307,7 +1307,8 @@ function Invoices({records,save,remove,openEdit}:any){
   });
 
   const [showForm,setShowForm]=useState(false);
-
+  const [createdInvoice, setCreatedInvoice] = useState<any | null>(null);
+  
   const pairs =
     (Number(f.cartons)||0) *
     (cartonPairs[f.cartonType] || 0);
@@ -1416,34 +1417,29 @@ function Invoices({records,save,remove,openEdit}:any){
     pairs<=readyPairs
   );
 
-  const createInvoice=async()=>{
-    if(!canInvoice)return;
+  const createInvoice = async () => {
+  if (!canInvoice) return;
 
-    const now=new Date();
+  const now = new Date();
 
-    await save('invoices',{
-      ...f,
-      cartons:Number(f.cartons)||0,
-      price:Number(f.price)||0,
-      pairs,
-      total,
-      date:now.toISOString().slice(0,10),
-      time:now.toLocaleTimeString(),
-      invoiceNumber:'INV-'+Date.now(),
-      entryType:'Banam',
-      createdAt:now.toISOString()
-    });
-
-    setF({
-      customer:'',
-      article:'',
-      cartonType:'24 pairs',
-      cartons:'',
-      price:''
-    });
-
-    setShowForm(false);
+  const invoice = {
+    ...f,
+    cartons: Number(f.cartons) || 0,
+    price: Number(f.price) || 0,
+    pairs,
+    total,
+    date: now.toISOString().slice(0, 10),
+    time: now.toLocaleTimeString(),
+    invoiceNumber: 'INV-' + Date.now(),
+    entryType: 'Banam',
+    createdAt: now.toISOString()
   };
+
+  await save('invoices', invoice);
+
+  setCreatedInvoice(invoice);
+  setShowForm(false);
+};
 
   return (
     <div>
