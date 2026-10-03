@@ -1861,3 +1861,35 @@ hr {
 .panel .table-wrap tbody td:nth-child(9) {
   white-space: nowrap !important;
 }
+.invoice-banam-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 22px !important;
+  padding: 3px 8px !important;
+  margin-right: 6px !important;
+  box-sizing: border-box !important;
+  border-radius: 6px !important;
+  background: #FDECEC !important;
+  color: #C62828 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+  vertical-align: middle !important;
+}
+
+.invoice-banam-total {
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.invoice-th-sub {
+  display: block !important;
+  margin-top: 3px !important;
+  color: #C62828 !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+}
