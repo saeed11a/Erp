@@ -1692,7 +1692,149 @@ rows={records.invoices || []}
 remove={remove}
 openEdit={openEdit}
 />
+{createdInvoice && (
+  <div className="invoice-preview-overlay">
+    <div className="invoice-preview-modal">
 
+      <div className="invoice-preview-toolbar">
+        <div>
+          <b>Invoice Preview</b>
+          <small>Invoice created successfully</small>
+        </div>
+
+        <div>
+          <button onClick={() => window.print()}>
+            Print
+          </button>
+
+          <button onClick={() => setCreatedInvoice(null)}>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div className="print-invoice">
+
+        <div className="print-invoice-top">
+          <div className="print-invoice-title">
+            INVOICE
+          </div>
+
+          <div>
+            <strong>HIKER+</strong>
+            <span>SHOES FACTORY</span>
+          </div>
+        </div>
+
+        <div className="print-invoice-meta">
+          <div>
+            <span>Invoice To:</span>
+            <strong>{createdInvoice.customer}</strong>
+            <small>Banam Invoice / Sales</small>
+          </div>
+
+          <div>
+            <span>Invoice No.</span>
+            <strong>{createdInvoice.invoiceNumber}</strong>
+
+            <span>Date</span>
+            <strong>{createdInvoice.date}</strong>
+          </div>
+        </div>
+
+        <table className="print-invoice-table">
+          <thead>
+            <tr>
+              <th>SL</th>
+              <th>Item Description</th>
+              <th>Price</th>
+              <th>Qty.</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>01</td>
+
+              <td>
+                <strong>
+                  HIKER+ {createdInvoice.article}
+                </strong>
+
+                <small>
+                  {createdInvoice.cartonType} carton
+                </small>
+              </td>
+
+              <td>
+                PKR {Number(createdInvoice.price || 0).toLocaleString()}
+              </td>
+
+              <td>
+                {Number(createdInvoice.pairs || 0).toLocaleString()} pairs
+              </td>
+
+              <td>
+                PKR {Number(createdInvoice.total || 0).toLocaleString()}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="print-invoice-bottom">
+
+          <div>
+            <strong>PAYMENT INFO</strong>
+            <span>Customer: {createdInvoice.customer}</span>
+            <span>Entry: Banam / Sale</span>
+            <span>
+              Quantity: {createdInvoice.pairs} pairs
+            </span>
+
+            <div>
+              Authorized Signature
+            </div>
+          </div>
+
+          <div>
+
+            <div>
+              <span>Sub Total</span>
+              <strong>
+                PKR {Number(createdInvoice.total || 0).toLocaleString()}
+              </strong>
+            </div>
+
+            <div>
+              <span>Discount</span>
+              <strong>PKR 0</strong>
+            </div>
+
+            <div>
+              <span>Tax</span>
+              <strong>PKR 0</strong>
+            </div>
+
+            <div>
+              <span>Total</span>
+              <strong>
+                PKR {Number(createdInvoice.total || 0).toLocaleString()}
+              </strong>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="print-invoice-footer">
+          Thank you for your business
+          <strong>HIKER+ • SHOES FACTORY</strong>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
 </div>
 </div>
 );
