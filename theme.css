@@ -970,7 +970,7 @@ margin-bottom: 16px !important;
    HIKER+ INVOICE PREVIEW
    ================================ */
 
-.invoice-preview-overlay {
+.invoice-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -982,7 +982,7 @@ margin-bottom: 16px !important;
   overflow-y: auto;
 }
 
-.invoice-preview-modal {
+.invoice-popup {
   width: min(950px, 100%);
   max-height: 95vh;
   overflow-y: auto;
