@@ -963,7 +963,7 @@ a:hover {
   max-height: none !important;
 
   padding: 22px !important;
-  margin-bottom: 16px !importan;
+margin-bottom: 16px !important;
 }
 
 /* ================================
@@ -1358,5 +1358,146 @@ a:hover {
 
   .invoice-preview-toolbar {
     display: none;
+  }
+}
+
+/* =========================================================
+   CUSTOMER / SUPPLIER KATA — DARK ACCOUNT CARD
+   ========================================================= */
+
+.account-card {
+  position: relative !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 18px !important;
+
+  width: 100% !important;
+  min-height: 285px !important;
+  height: auto !important;
+  max-height: none !important;
+
+  padding: 24px !important;
+  margin-bottom: 18px !important;
+
+  box-sizing: border-box !important;
+
+  background:
+    radial-gradient(
+      circle at 88% 0%,
+      rgba(255,255,255,.10) 0,
+      rgba(255,255,255,.10) 18%,
+      transparent 19%
+    ),
+    #111923 !important;
+
+  border: 1px solid #293442 !important;
+  border-radius: 22px !important;
+
+  color: #FFFFFF !important;
+  overflow: hidden !important;
+
+  box-shadow: 0 12px 30px rgba(0,0,0,.12) !important;
+}
+
+.account-card .account-avatar {
+  flex-shrink: 0 !important;
+}
+
+.account-card .account-main {
+  flex: 1 !important;
+  min-width: 0 !important;
+  color: #FFFFFF !important;
+}
+
+.account-card .account-main > b {
+  color: #FFFFFF !important;
+  font-size: 20px !important;
+}
+
+.account-card .credit-text {
+  color: #69D39A !important;
+}
+
+.account-card .debit-text {
+  color: #FF6573 !important;
+}
+
+.account-card .balance-positive {
+  color: #69D39A !important;
+}
+
+.account-card .balance-negative {
+  color: #FF6573 !important;
+}
+
+/* Last transaction stays INSIDE the card */
+.account-card .account-last-transaction {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+
+  margin-top: 16px !important;
+  padding-top: 14px !important;
+
+  border-top: 1px solid rgba(255,255,255,.12) !important;
+
+  color: #FFFFFF !important;
+}
+
+.account-card .account-last-label,
+.account-card .account-last-title,
+.account-card .account-last-date {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+.account-card .account-last-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+.account-card .account-last-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.account-card .account-last-date {
+  font-size: 11px !important;
+}
+
+/* Edit / Delete */
+.account-card .record-actions {
+  flex-shrink: 0 !important;
+}
+
+.account-card .edit-btn {
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.20) !important;
+  color: #FFFFFF !important;
+}
+
+.account-card .edit-btn:hover {
+  background: rgba(255,255,255,.16) !important;
+}
+
+.account-card .danger-icon {
+  color: #FF6573 !important;
+}
+
+@media (max-width: 700px) {
+  .account-card {
+    min-height: 285px !important;
+    padding: 20px !important;
+    gap: 14px !important;
+  }
+
+  .account-card .account-main > b {
+    font-size: 19px !important;
+  }
+
+  .account-card .record-actions {
+    gap: 4px !important;
   }
 }
