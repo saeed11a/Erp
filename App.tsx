@@ -2491,31 +2491,30 @@ function SimpleTable({title,table,rows,remove,openEdit}:any){
                     </td>
 
                     <td>
-                      {r.note||'—'}
-                    </td>
+  {r.note || '—'}
+</td>
 
-                    <td>
-                      {r.paymentMethod||'—'}
-                    </td>
-                  </>
-                ) : table==='invoices' ? (
-                  <>
-                    <td>
-                      <b>
-                        {r.invoiceNumber||'—'}
-                      </b>
-                    </td>
+<td>
+  {r.paymentMethod || '—'}
+</td>
+</>
+) : table === 'invoices' ? (
+<>
+  <td>
+    <b className="invoice-number">
+      {r.invoiceNumber || '—'}
+    </b>
+  </td>
 
-                    <td>
-                      <b>
-                        {r.customer||'—'}
-                      </b>
-                    </td>
+  <td>
+    <b>
+      {r.customer || '—'}
+    </b>
+  </td>
 
-                    <td>
-                      {r.article||'—'}
-                    </td>
-
+  <td>
+    {r.article || '—'}
+  </td>
                     <td>
                       {r.cartonType||'—'}
                     </td>
