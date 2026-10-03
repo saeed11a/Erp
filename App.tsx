@@ -680,17 +680,91 @@ function ReadyShoes({records,save,remove,openEdit}:any){
     <div className="panel"><div className="panel-head"><div><b>Ready Shoes Stock</b><small>{rows.length} records</small></div><button className="primary" onClick={()=>setShowForm(v=>!v)}><Plus size={18}/>{showForm?' Close':' New Ready Shoes'}</button></div>
       {showForm&&<div className="form-panel"><ReadyForm save={async(...args:any[])=>{await save(...args);setShowForm(false);}}/></div>}
       <div className="table-wrap"><table><thead><tr><th>Article</th><th>Carton</th><th>Cartons</th><th>Current pairs</th><th>Source</th><th>Actions</th></tr></thead><tbody>
-      {rows.map((r:any)=><tr key={r.id}><td><b>{r.article}</b></td><td>{r.cartonType}</td><td>{r.cartons}</td><td>{Number(r.availablePairs??r.totalPairs??0).toLocaleString()}</td><td>{r.productionId?'Production':'Manual'}</td><td><RecordActions onEdit={()=>openEdit('readyShoes',r)} onDelete={()=>remove('readyShoes',r.id)}/></td></tr>)}
-    </tbody></table>{!rows.length&&<Empty text="No ready shoes found."/>}</div></div>
+      {rows.map((r:any)=>
+  <tr key={r.id}>
+    <td><b>{r.article}</b></td>
+    <td>{r.cartonType}</td>
+    <td>{r.cartons}</td>
+    <td>
+      {Number(r.availablePairs ?? r.totalPairs ?? 0).toLocaleString()}
+    </td>
+    <td>
+      {r.source === 'Production' || r.productionSource
+        ? 'Production'
+        : 'Manual'}
+    </td>
+    <td>
+      <RecordActions
+        onEdit={()=>openEdit('readyShoes',r)}
+        onDelete={()=>remove('readyShoes',r.id)}
+      />
+    </td>
+  </tr>
+)}
+      </tbody></table>{!rows.length&&<Empty text="No ready shoes found."/>}</div></div>
   </div>;
 }
 
 function ReadyForm({save}:any){
-  const [f,setF]=useState({name:'',article:'',cartonType:'24 pairs',cartons:''});const pairs=(Number(f.cartons)||0)*cartonPairs[f.cartonType];
-  return <div className="form-grid"><Input label="Name" value={f.name} onChange={v=>setF({...f,name:v})}/><Input label="Article" value={f.article} onChange={v=>setF({...f,article:v})}/>
-    <Select label="Carton" value={f.cartonType} options={Object.keys(cartonPairs)} onChange={v=>setF({...f,cartonType:v})}/><Input label="Carton quantity" type="number" value={f.cartons} onChange={v=>setF({...f,cartons:v})}/>
-    <div className="calc">Pairs: <b>{pairs.toLocaleString()}</b></div><button className="primary full" onClick={()=>f.article&&save('readyShoes',{...f,totalPairs:pairs,availablePairs:pairs,date:new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()})}>Save Ready Shoes</button>
-  </div>;
+  const [f,setF]=useState({
+    name:'',
+    article:'',
+    cartonType:'24 pairs',
+    cartons:''
+  });
+
+  const pairs=(Number(f.cartons)||0)*cartonPairs[f.cartonType];
+
+  return (
+    <div className="form-grid">
+      <Input
+        label="Name"
+        value={f.name}
+        onChange={v=>setF({...f,name:v})}
+      />
+
+      <Input
+        label="Article"
+        value={f.article}
+        onChange={v=>setF({...f,article:v})}
+      />
+
+      <Select
+        label="Carton"
+        value={f.cartonType}
+        options={Object.keys(cartonPairs)}
+        onChange={v=>setF({...f,cartonType:v})}
+      />
+
+      <Input
+        label="Carton quantity"
+        type="number"
+        value={f.cartons}
+        onChange={v=>setF({...f,cartons:v})}
+      />
+
+      <div className="calc">
+        Pairs: <b>{pairs.toLocaleString()}</b>
+      </div>
+
+      <button
+        className="primary full"
+        onClick={() =>
+          f.article &&
+          save('readyShoes',{
+            ...f,
+            totalPairs:pairs,
+            availablePairs:pairs,
+            date:new Date().toISOString().slice(0,10),
+            createdAt:new Date().toISOString(),
+            source:'Manual'
+          })
+        }
+      >
+        Save Ready Shoes
+      </button>
+    </div>
+  );
 }
 
 function Articles({records}:any){
