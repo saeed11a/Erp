@@ -2401,7 +2401,7 @@ function SimpleTable({title,table,rows,remove,openEdit}:any){
         <table>
 
           <thead>
-            <tr  className={table==='invoices' ? 'invoice-table-head' : ''}>>
+            <tr  className={table==='invoices' ? 'invoice-table-head' : ''}>
 
               {payments ? (
                 <>
