@@ -1764,8 +1764,7 @@ const calculatedPairs=
       )}
     </div>
   );
-            }
-
+}
 function Payments({records,save,remove,openEdit}:any){
   const [f,setF]=useState({type:'Customer',name:'',amount:'',paymentMethod:'Cash',note:''}),[showForm,setShowForm]=useState(false);
   const names=useMemo(()=>{const rows=(f.type==='Customer'?records.customers:records.suppliers)||[];const m=new Map<string,string>();rows.forEach((r:any)=>{const n=String(r.name||'').trim();if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);});return [...m.values()];},[records,f.type]);
