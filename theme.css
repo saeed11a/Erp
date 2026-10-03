@@ -1733,3 +1733,20 @@ hr {
     min-width: 720px !important;
   }
 }
+.invoice-form-grid > .primary.full {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.invoice-form-grid > .primary.full:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
