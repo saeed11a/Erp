@@ -2529,14 +2529,17 @@ function SimpleTable({title,table,rows,remove,openEdit}:any){
                       ).toLocaleString()}
                     </td>
 
-                    <td>
-                      <span className="debit-text">
-                        PKR {Number(
-                          r.total||0
-                        ).toLocaleString()}
-                      </span>
-                    </td>
+                     <td>
+  <span className="invoice-banam-badge">
+    Banam
+  </span>
 
+  <span className="debit-text invoice-banam-total">
+    PKR {Number(
+      r.total||0
+    ).toLocaleString()}
+  </span>
+</td>
                     <td>
                       {r.date||'—'}
 
