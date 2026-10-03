@@ -1622,6 +1622,8 @@ function Invoices({records,save,remove,openEdit}:any){
                 }
               />
 
+
+               
 <Input
 label="Number of Cartons"
 type="number"
@@ -1675,23 +1677,22 @@ price: v
       : pairs > 0
         ? `✓ Ready Shoes available • ${readyPairs.toLocaleString()} pairs`
         : 'Select cartons to calculate pairs'}
-  </div>
-</div>
-              <button
+  </div></div><button
 className="primary full"
 disabled={!canInvoice}
 onClick={createInvoice}
-                >
+  >            
+  
   <FileText size={18}/>
   Create Invoice • Banam
-           </button>
-            </div>
-          </div>
-        )}
-        <SimpleTable
-       title=""
-      table="invoices"
-     rows={records.invoices || []}
+  </button>
+      </div>
+      
+    </div>
+)}<SimpleTable
+title=""
+table="invoices"
+rows={records.invoices || []}
 remove={remove}
 openEdit={openEdit}
 />
@@ -1700,8 +1701,6 @@ openEdit={openEdit}
 </div>
 );
 }
-
-
 function Payments({records,save,remove,openEdit}:any){
   const [f,setF]=useState({type:'Customer',name:'',amount:'',paymentMethod:'Cash',note:''}),[showForm,setShowForm]=useState(false);
   const names=useMemo(()=>{const rows=(f.type==='Customer'?records.customers:records.suppliers)||[];const m=new Map<string,string>();rows.forEach((r:any)=>{const n=String(r.name||'').trim();if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);});return [...m.values()];},[records,f.type]);
