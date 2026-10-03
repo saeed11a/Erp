@@ -1750,3 +1750,114 @@ hr {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
 }
+
+/* Invoice table layout */
+.panel .table-wrap table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.panel .table-wrap th,
+.panel .table-wrap td {
+  vertical-align: middle !important;
+}
+
+.panel .table-wrap th {
+  white-space: nowrap !important;
+}
+
+/* Invoice number */
+.panel .table-wrap .invoice-no {
+  display: block !important;
+  margin-top: 3px !important;
+  color: #73747A !important;
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+}
+
+/* Invoice customer */
+.panel .table-wrap td b {
+  color: #20232B !important;
+}
+
+/* Invoice total */
+.panel .table-wrap .debit-text {
+  font-weight: 750 !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile horizontal scrolling */
+@media (max-width: 700px) {
+  .panel .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+  }
+
+  .panel .table-wrap table {
+    min-width: 900px !important;
+    width: max-content !important;
+  }
+
+  .panel .table-wrap th,
+  .panel .table-wrap td {
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+  }
+}
+/* Invoice row styling */
+.panel .table-wrap tbody tr {
+  transition: background 0.15s ease !important;
+}
+
+.panel .table-wrap tbody tr:hover {
+  background: #FAFAF8 !important;
+}
+
+/* Invoice number */
+.panel .table-wrap tbody td:first-child b {
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Customer name */
+.panel .table-wrap tbody td:nth-child(2) b {
+  font-size: 13px !important;
+  font-weight: 650 !important;
+}
+
+/* Article */
+.panel .table-wrap tbody td:nth-child(3) {
+  font-weight: 600 !important;
+}
+
+/* Carton type */
+.panel .table-wrap tbody td:nth-child(4) {
+  color: #55585F !important;
+}
+
+/* Quantity values */
+.panel .table-wrap tbody td:nth-child(5),
+.panel .table-wrap tbody td:nth-child(6) {
+  font-weight: 650 !important;
+}
+
+/* Price per pair */
+.panel .table-wrap tbody td:nth-child(7) {
+  white-space: nowrap !important;
+}
+
+/* Banam total */
+.panel .table-wrap tbody td:nth-child(8) .debit-text {
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+/* Date */
+.panel .table-wrap tbody td:nth-child(9) {
+  white-space: nowrap !important;
+}
