@@ -1861,6 +1861,7 @@ hr {
 .panel .table-wrap tbody td:nth-child(9) {
   white-space: nowrap !important;
 }
+
 .invoice-banam-badge {
   display: inline-flex !important;
   align-items: center !important;
