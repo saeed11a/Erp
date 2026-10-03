@@ -1310,7 +1310,8 @@ function Invoices({records,save,remove,openEdit}:any){
   const canInvoice=Boolean(f.customer&&f.article&&pairs>0&&pairs<=readyPairs);
   return <div><PageTitle title="Invoices" sub="Banam = invoice/debit. Customer must pay. Banam is red; Jamma/payment credit is blue."/>
     <div className="panel"><div className="panel-head"><div><b>Invoice Register</b><small>{(records.invoices||[]).length} records</small></div><button className="primary" onClick={()=>setShowForm(v=>!v)}><Plus size={18}/>{showForm?' Close':' New Invoice'}</button></div>
-    {showForm&&<div className="form-panel"><div className="form-grid">
+    {showForm&&<div className="form-panel invoice-form-panel">
+  <div className="invoice-form-grid">
       <label className="field"><span>Customer</span><input list="invoice-customers" value={f.customer} onChange={e=>setF({...f,customer:e.target.value})}/><datalist id="invoice-customers">{customerOptions.map((n:string)=><option key={n} value={n}/>)}</datalist><small className={customerExists?'credit-text':'debit-text'}>{customerExists?'Existing customer':'New customer will be created automatically'}</small></label>
       <Select label="Article" value={f.article} options={articleOptions} onChange={v=>setF({...f,article:v})}/>
       <div className="stock-available"><span>Ready Shoes available for {f.article||'selected article'}</span><b>{readyPairs.toLocaleString()} pairs</b><strong>{readyCartons.toLocaleString()} cartons stored</strong>{readyRows.length>0&&<small>{readyRows.map((r:any)=>{const p=Number(r.availablePairs??r.totalPairs??0);return (p>0?(Math.floor(p/(cartonPairs[r.cartonType]||1))+' × '+r.cartonType):'')}).filter(Boolean).join(' • ')}</small>}</div>
