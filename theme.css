@@ -1992,3 +1992,11 @@ hr {
     padding: 10px 12px !important;
   }
 }
+.invoice-number {
+  display: block !important;
+  color: #20232B !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  letter-spacing: .02em !important;
+  white-space: nowrap !important;
+}
