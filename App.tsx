@@ -1622,96 +1622,85 @@ function Invoices({records,save,remove,openEdit}:any){
                 }
               />
 
-              <Input
-                label="Cartons"
-                type="number"
-                value={f.cartons}
-                onChange={v=>
-                  setF({
-                    ...f,
-                    cartons:v
-                  })
-                }
-              />
+<Input
+label="Number of Cartons"
+type="number"
+value={f.cartons}
+onChange={v =>
+setF({
+...f,
+cartons: v
+})
+}
+/>
 
-              <Input
-                label="Price per pair"
-                type="number"
-                value={f.price}
-                onChange={v=>
-                  setF({
-                    ...f,
-                    price:v
-                  })
-                }
-              />
+<Input
+label="Price per Pair (PKR)"
+type="number"
+value={f.price}
+onChange={v =>
+setF({
+...f,
+price: v
+})
+}
+/>
 
-              <div className="invoice-summary">
-
-                <div className="invoice-summary-item">
-                  <span>Pairs</span>
-                  <b>
-                    {pairs.toLocaleString()}
-                  </b>
-                </div>
-
-                <div className="invoice-summary-item">
-                  <span>Price / Pair</span>
-                  <b>
-                    PKR {Number(
-                      f.price||0
-                    ).toLocaleString()}
-                  </b>
-                </div>
-
-                <div className="invoice-summary-item invoice-total">
-                  <span>Banam Total</span>
-                  <b className="debit-text">
-                    PKR {total.toLocaleString()}
-                  </b>
-                </div>
-
-                <div
-                  className={
-                    pairs>readyPairs
-                      ? 'invoice-stock-status invoice-stock-error'
-                      : 'invoice-stock-status invoice-stock-ok'
-                  }
-                >
-                  {pairs>readyPairs
-                    ? 'Insufficient Ready Shoes'
-                    : '✓ Ready Shoes available'}
-                </div>
-
-              </div>
-
+<div className="invoice-summary">  <div className="invoice-summary-item">
+    <span>Total Pairs</span>
+    <b>
+      {pairs.toLocaleString()}
+    </b>
+  </div>  <div className="invoice-summary-item">
+    <span>Price per Pair</span>
+    <b>
+      PKR {Number(
+        f.price || 0
+      ).toLocaleString()}
+    </b>
+  </div>  <div className="invoice-summary-item invoice-total">
+    <span>Grand Total</span>
+    <b className="debit-text">
+      PKR {total.toLocaleString()}
+    </b>
+  </div>  <div
+    className={
+      pairs > readyPairs
+        ? 'invoice-stock-status invoice-stock-error'
+        : 'invoice-stock-status invoice-stock-ok'
+    }
+  >
+    {pairs > readyPairs
+      ? `Insufficient Ready Shoes • ${readyPairs.toLocaleString()} pairs available`
+      : pairs > 0
+        ? `✓ Ready Shoes available • ${readyPairs.toLocaleString()} pairs`
+        : 'Select cartons to calculate pairs'}
+  </div>
+</div>
               <button
-                className="primary full"
-                disabled={!canInvoice}
-                onClick={createInvoice}
-              >
-                <FileText size={18}/>
-                Create invoice (Banam)
-              </button>
-
+className="primary full"
+disabled={!canInvoice}
+onClick={createInvoice}
+                >
+  <FileText size={18}/>
+  Create Invoice • Banam
+           </button>
             </div>
-
           </div>
         )}
-
         <SimpleTable
-          title=""
-          table="invoices"
-          rows={records.invoices||[]}
-          remove={remove}
-          openEdit={openEdit}
-        />
+       title=""
+      table="invoices"
+     rows={records.invoices || []}
+remove={remove}
+openEdit={openEdit}
+/>
 
-      </div>
+</div>
+</div>
+);
+}
 
-    </div>
-  );
-                  }
 
 function Payments({records,save,remove,openEdit}:any){
   const [f,setF]=useState({type:'Customer',name:'',amount:'',paymentMethod:'Cash',note:''}),[showForm,setShowForm]=useState(false);
