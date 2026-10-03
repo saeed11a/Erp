@@ -1298,7 +1298,7 @@ function Purchases({records,save,update,remove,openEdit}:any){
 
 function Invoices({records,save,remove,openEdit}:any){
   const customers=(records.customers||[]) as any[];
-  const articles=(records.articles||[]) as any[];
+  const readyShoes=(records.readyShoes||[]) as any[];
 
   const [showForm,setShowForm]=useState(false);
   const [showPreview,setShowPreview]=useState(false);
@@ -1306,11 +1306,8 @@ function Invoices({records,save,remove,openEdit}:any){
   const [f,setF]=useState({
     customer:'',
     article:'',
-    size:'',
-    color:'',
     cartonType:'18-pair carton',
     cartons:'',
-    pairs:'',
     price:'',
     discount:'',
     tax:'',
@@ -1327,29 +1324,39 @@ function Invoices({records,save,remove,openEdit}:any){
     '24-pair carton':24
   };
 
-  const customerNames=useMemo(()=>{
-    const m=new Map<string,string>();
-    customers.forEach((r:any)=>{
-      const n=String(r.name||'').trim();
-      if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);
-    });
-    return [...m.values()];
-  },[customers]);
+  
+const customerNames=useMemo(()=>{
+  const m=new Map<string,string>();
 
-  const articleNames=useMemo(()=>{
-    const m=new Map<string,string>();
-    articles.forEach((r:any)=>{
-      const n=String(r.name||r.article||r.code||'').trim();
-      if(n&&!m.has(n.toLowerCase()))m.set(n.toLowerCase(),n);
-    });
-    return [...m.values()];
-  },[articles]);
+  customers.forEach((r:any)=>{
+    const n=String(r.name||'').trim();
 
-  const calculatedPairs=
-    Number(f.pairs||0)>0
-      ? Number(f.pairs||0)
-      : Number(f.cartons||0)*(cartonPairs[f.cartonType]||0);
+    if(n&&!m.has(n.toLowerCase())){
+      m.set(n.toLowerCase(),n);
+    }
+  });
 
+  return [...m.values()];
+},[customers]);
+
+const articleNames=useMemo(()=>{
+  const m=new Map<string,string>();
+
+  readyShoes.forEach((r:any)=>{
+    const article=String(r.article||'').trim();
+    const available=Number(r.availablePairs??r.totalPairs??0);
+
+    if(article && available>0 && !m.has(article.toLowerCase())){
+      m.set(article.toLowerCase(),article);
+    }
+  });
+
+  return [...m.values()];
+},[readyShoes]);
+  
+const calculatedPairs=
+  Number(f.cartons||0)*(cartonPairs[f.cartonType]||0);
+  
   const subTotal=calculatedPairs*Number(f.price||0);
   const discount=Number(f.discount||0);
   const tax=Number(f.tax||0);
@@ -1380,22 +1387,17 @@ function Invoices({records,save,remove,openEdit}:any){
     setShowPreview(true);
 
     setF({
-      customer:'',
-      article:'',
-      size:'',
-      color:'',
-      cartonType:'18-pair carton',
-      cartons:'',
-      pairs:'',
-      price:'',
-      discount:'',
-      tax:'',
-      notes:'',
-      terms:'Payment due as agreed.',
-      date:new Date().toISOString().slice(0,10)
-    });
-  };
-
+  customer:'',
+  article:'',
+  cartonType:'18-pair carton',
+  cartons:'',
+  price:'',
+  discount:'',
+  tax:'',
+  notes:'',
+  terms:'Payment due as agreed.',
+  date:new Date().toISOString().slice(0,10)
+});
   const printInvoice=()=>{
     window.print();
   };
@@ -1481,18 +1483,16 @@ function Invoices({records,save,remove,openEdit}:any){
               />
 
               <Input
-                label="Cartons"
-                type="number"
-                value={f.cartons}
-                onChange={v=>setF({...f,cartons:v,pairs:''})}
-              />
+  label="Cartons"
+  type="number"
+  value={f.cartons}
+  onChange={v=>setF({...f,cartons:v})}
+/>
 
-              <Input
-                label="Pairs"
-                type="number"
-                value={f.pairs}
-                onChange={v=>setF({...f,pairs:v,cartons:''})}
-              />
+              <div className="field">
+  <span>Total Pairs</span>
+  <strong>{calculatedPairs.toLocaleString()} pairs</strong>
+</div>
 
               <Input
                 label="Price / Pair"
