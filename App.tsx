@@ -1448,10 +1448,25 @@ function Invoices({records,save,remove,openEdit}:any){
   return (
     <div>
 
-      <PageTitle
-        title="Invoices"
-        sub="Banam = invoice/debit. Customer must pay. Banam is red; Jamma/payment credit is blue."
-      />
+      <div className="invoice-page-header">
+  <div>
+    <div className="invoice-brand">HIKER+</div>
+    <h1>Invoice</h1>
+    <p>Banam Invoice / Sales</p>
+  </div>
+
+  <div className="invoice-header-meta">
+    <div>
+      <span>Invoice No.</span>
+      <b>INV-{Date.now()}</b>
+    </div>
+
+    <div>
+      <span>Date</span>
+      <b>{new Date().toISOString().slice(0, 10)}</b>
+    </div>
+  </div>
+</div>
 
       <div className="panel">
 
@@ -1491,56 +1506,58 @@ function Invoices({records,save,remove,openEdit}:any){
 
             <div className="invoice-form-grid">
 
-              <label className="field">
-                <span>Customer</span>
 
-                <input
-                  list="invoice-customers"
-                  value={f.customer}
-                  onChange={e=>
-                    setF({
-                      ...f,
-                      customer:e.target.value
-                    })
-                  }
-                />
+              <label className="field invoice-customer-field">
+  <span>Customer</span>
 
-                <datalist id="invoice-customers">
-                  {customerOptions.map(
-                    (n:string)=>(
-                      <option
-                        key={n}
-                        value={n}
-                      />
-                    )
-                  )}
-                </datalist>
+  <input
+    list="invoice-customers"
+    value={f.customer}
+    placeholder="Search or enter customer name"
+    onChange={e =>
+      setF({
+        ...f,
+        customer: e.target.value
+      })
+    }
+  />
 
-                <small
-                  className={
-                    customerExists
-                      ? 'credit-text'
-                      : 'debit-text'
-                  }
-                >
-                  {customerExists
-                    ? 'Existing customer'
-                    : 'New customer will be created automatically'}
-                </small>
-              </label>
+  <datalist id="invoice-customers">
+    {customerOptions.map((n:string) => (
+      <option
+        key={n}
+        value={n}
+      />
+    ))}
+  </datalist>
 
-              <Select
-                label="Article"
-                value={f.article}
-                options={articleOptions}
-                onChange={v=>
-                  setF({
-                    ...f,
-                    article:v
-                  })
-                }
-              />
+  {f.customer.trim() && (
+    <small
+      className={
+        customerExists
+          ? 'credit-text'
+          : 'debit-text'
+      }
+    >
+      {customerExists
+        ? '✓ Existing customer'
+        : 'New customer'}
+    </small>
+  )}
+</label>
+        
 
+<Select
+  label="Article"
+  value={f.article}
+  options={articleOptions}
+  onChange={v=>
+    setF({
+      ...f,
+      article:v
+    })
+  }
+/>
               <div className="stock-available">
 
                 <span>
