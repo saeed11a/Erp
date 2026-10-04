@@ -1533,3 +1533,34 @@ td b,
 .table-panel td b {
   color: var(--text-primary) !important;
   }
+/* MOBILE TOPBAR CLEANUP */
+
+@media (max-width: 760px) {
+  .topbar {
+    min-height: 64px !important;
+    height: auto !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+
+  .topbar > div {
+    min-width: 0 !important;
+  }
+
+  .topbar .eyebrow {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  .top-actions {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .mobile-menu {
+    flex-shrink: 0 !important;
+  }
+}
