@@ -328,19 +328,10 @@ const remove = async (table: string, id: string) => {
     </button>
 
     <div>
-      <div className="eyebrow">
-        HIKER SHOES • FACTORY OPERATIONS
-      </div>
-
-      <h1>
-        {account
-          ? (account.type === 'customer'
-              ? 'Customer Kata'
-              : 'Supplier Kata')
-          : currentLabel}
-      </h1>
-    </div>
-
+  <div className="eyebrow">
+    HIKER+ SHOES
+  </div>
+</div>
     <div className="top-actions">
 
       <button
