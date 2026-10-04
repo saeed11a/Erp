@@ -115,7 +115,6 @@ body {
 /* =========================================================
    PAGE HEADINGS
    ========================================================= */
-
 h1,
 h2,
 h3,
@@ -132,16 +131,17 @@ small,
   color: var(--text-secondary);
 }
 
-.page-head h2,
-.topbar h1 {
+.page-head h2 {
   color: var(--text-primary) !important;
 }
 
-.page-head p,
-.eyebrow {
-  color: var(--text-secondary) !important;
+.page-head p {
+  color: var(--text-primary) !important;
 }
 
+.eyebrow {
+  color: var(--text-primary) !important;
+}
 /* =========================================================
    CARDS / PANELS / METRICS
    ========================================================= */
@@ -380,7 +380,7 @@ th,
 .table-card th,
 .table-panel th {
   background: var(--table-head) !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important;
   border-bottom: 1px solid var(--border) !important;
   font-size: 12px;
   font-weight: 600;
@@ -398,11 +398,18 @@ td,
   border-bottom: 1px solid var(--border) !important;
 }
 
+td b,
+.table-wrap td b,
+.table-container td b,
+.table-card td b,
+.table-panel td b {
+  color: var(--text-primary) !important;
+}
+
 tbody tr:hover td,
 .table-wrap tr:hover td {
   background: var(--table-hover) !important;
 }
-
 /* =========================================================
    TABS
    ========================================================= */
@@ -1501,3 +1508,28 @@ margin-bottom: 16px !important;
     gap: 4px !important;
   }
 }
+/* FINAL TABLE TEXT COLOR FIX */
+
+th,
+.table-wrap th,
+.table-container th,
+.table-card th,
+.table-panel th {
+  color: var(--text-primary) !important;
+}
+
+td,
+.table-wrap td,
+.table-container td,
+.table-card td,
+.table-panel td {
+  color: var(--text-primary) !important;
+}
+
+td b,
+.table-wrap td b,
+.table-container td b,
+.table-card td b,
+.table-panel td b {
+  color: var(--text-primary) !important;
+  }
